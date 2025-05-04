@@ -8,7 +8,7 @@ library(scales)
 library(dplyr)
 library(splines)
 
-df2 <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/00-DPE/alldpe_metrics_Scott_v3.csv")
+df2 <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/data-dpe/alldpe_metrics_scott_v3.csv")
 
 # Add the ancien_dpe_ep_conso_5_usages_m2 variable
 df2$ancien_dpe_ep_conso_5_usages_m2 <- 

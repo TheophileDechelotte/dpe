@@ -6,7 +6,7 @@ library(dplyr)
 
 # 0. Chargement des données ----
 
-df <- read_csv("data/alldpe_v2.csv")
+df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_v2.csv")
 
 df <- df %>%
   mutate(
@@ -26,7 +26,7 @@ df <- df %>%
     periode_construction = as.factor(periode_construction),
     type_energie_chauffage = as.factor(type_energie_chauffage))
 
-simulation_results_CSV <- read_csv("data/alldpe_simulation_scott.csv")
+simulation_results_CSV <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_simulation_scott.csv")
 
 # 1. Fonctions utilitaires ----
 
@@ -217,4 +217,4 @@ df_metrics <- df_metrics %>%
 
 # 3. Enregistrer le résultat ----
 
-write_csv(df_metrics, "data/alldpe_metrics_Scott_v3.csv")
+write_csv(df_metrics, "data/alldpe_metrics_scott_v3.csv")
