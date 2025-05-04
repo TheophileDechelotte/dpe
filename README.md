@@ -1,21 +1,6 @@
 # dpe
 
-This repository accompanies my Master’s thesis on the EPC shopping behaviour in the French EPC scheme. It contains R pipelines to (i) run Monte‑Carlo simulations, (ii) construct prior and imprecision metrics, and (iii) estimate Regression‑Discontinuity (RD) effects on homeowners’ behaviour and retrofit outcomes.A reusable SQL view is provided to reproduce the cleaned micro‑dataset from the raw EPC database.
-
----
-
-## Repository layout
-
-```
-.
-├── metrics-simulation.R        # Build prior–ε metrics per subgroup and save to CSV + plots
-├── monte-carlo.R               # Monte-Carlo simulation of EPC measurement error & shopping behaviour
-├── RD-incentives-330.R         # RD design on purchase-timing “shopping” incentive at 330 kWh/m²
-├── RD-outcome-330.R            # RD design on retrofit outcomes around 330 kWh/m²
-├── view.sql                    # SQL view that computes derived variables used by the R scripts
-├── data/                       # (git-ignored) input & output .csv files
-└── graphs/                     # Auto-generated figures (.png)
-```
+This repository accompanies my Master’s thesis on the EPC shopping behaviour in the French EPC scheme. It contains R pipelines to (i) run Monte‑Carlo simulations, (ii) construct prior and imprecision metrics, and (iii) estimate Regression‑Discontinuity (RD) effects on homeowners’ behaviour and retrofit outcomes. A reusable SQL view is provided to reproduce the cleaned micro‑dataset from the raw EPC database.
 
 ---
 
