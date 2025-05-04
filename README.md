@@ -1,4 +1,4 @@
-# Manipulations in French EPC Ratings: Investigating shopping behaviour
+# Manipulations in french EPC ratings: investigating shopping behaviour
 
 This repository accompanies my Master’s thesis on the EPC shopping behaviour in the French EPC scheme. It contains R pipelines to (i) run Monte‑Carlo simulations, (ii) construct prior and imprecision metrics, and (iii) estimate Regression‑Discontinuity (RD) effects on homeowners’ behaviour and retrofit outcomes. A reusable SQL view is provided to reproduce the cleaned micro‑dataset from the raw EPC database.
 
@@ -30,7 +30,6 @@ This repository accompanies my Master’s thesis on the EPC shopping behaviour i
 |                     | Description |
 |---------------------|-------------|
 | **Purpose**         | Sharp RD estimation of the probability that a homeowner shop for a second EPC to move just below the 330 kWh/m² cut-off (indicator `shopping`). |
-| **Packages**        | `rdrobust`, `rddensity`, tidyverse stack. |
 | **Inputs**          | `data/alldpe_metrics_scott_v3.csv`. |
 | **Outputs**         | Multiple visuals saved to `graphs/` (RD plot, donut RD, covariate balance, heterogeneity). |
 
@@ -46,8 +45,7 @@ This repository accompanies my Master’s thesis on the EPC shopping behaviour i
 
 |                     | Description |
 |---------------------|-------------|
-| **Role**            | Defines a PostgreSQL view `alldpe_v2` that: <br>• joins the EPC core table with prior/next inspections ; <br>• computes time-interval variables (`interval_dpe_remplacant`, `interval_ancien_dpe`) ; <br>• normalises consumption per m² and splits it by use (heating, DHW, etc.). |
-| **Usage**           | `psql -f view.sql` or inside your DB client. Exports produced by the view are consumed by the R scripts. |
+| **Purpose**            | Defines a PostgreSQL view `alldpe_v2` that: <br>• joins the EPC core table with prior/next inspections ; <br>• computes time-interval variables (`interval_dpe_remplacant`, `interval_ancien_dpe`) ; <br>• normalises consumption per m² and splits it by use (heating, DHW, etc.). |
 
 ---
 
