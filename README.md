@@ -29,7 +29,7 @@ This repository accompanies my Master’s thesis on the EPC shopping behaviour i
 
 |                     | Description |
 |---------------------|-------------|
-| **Purpose**         | Sharp RD estimation of the **probability that a homeowner shop for a second EPC** to move just below the 330 kWh/m² cut-off (indicator `shopping`). |
+| **Purpose**         | Sharp RD estimation of the probability that a homeowner shop for a second EPC to move just below the 330 kWh/m² cut-off (indicator `shopping`). |
 | **Packages**        | `rdrobust`, `rddensity`, tidyverse stack. |
 | **Inputs**          | `data/alldpe_metrics_scott_v3.csv`. |
 | **Outputs**         | Multiple visuals saved to `graphs/` (RD plot, donut RD, covariate balance, heterogeneity). |
@@ -38,7 +38,7 @@ This repository accompanies my Master’s thesis on the EPC shopping behaviour i
 
 |                     | Description |
 |---------------------|-------------|
-| **Purpose**         | RD estimation of **retrofit effort**: compares pre- vs post-inspection behaviour and nets out shopping bias. |
+| **Purpose**         | RD estimation of retrofit effort: compares pre- vs post-inspection behaviour and nets out shopping bias. |
 | **Inputs**          | Same metrics file (`alldpe_metrics_scott_v3.csv`). |
 | **Outputs**         | RD and donut plots for pre/post shopping & DID RD effect. |
 
@@ -46,7 +46,7 @@ This repository accompanies my Master’s thesis on the EPC shopping behaviour i
 
 |                     | Description |
 |---------------------|-------------|
-| **Role**            | Defines a PostgreSQL view `alldpe_v2` (name truncated here) that: <br>• joins the EPC core table with prior/next inspections ; <br>• computes time-interval variables (`interval_dpe_remplacant`, `interval_ancien_dpe`) ; <br>• normalises consumption per m² and splits it by use (heating, DHW, etc.). |
+| **Role**            | Defines a PostgreSQL view `alldpe_v2` that: <br>• joins the EPC core table with prior/next inspections ; <br>• computes time-interval variables (`interval_dpe_remplacant`, `interval_ancien_dpe`) ; <br>• normalises consumption per m² and splits it by use (heating, DHW, etc.). |
 | **Usage**           | `psql -f view.sql` or inside your DB client. Exports produced by the view are consumed by the R scripts. |
 
 ---
