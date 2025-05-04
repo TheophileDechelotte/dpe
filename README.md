@@ -1,4 +1,4 @@
-# dpe
+# Manipulations in French EPC Ratings: Investigating shopping behavior
 
 This repository accompanies my Master’s thesis on the EPC shopping behaviour in the French EPC scheme. It contains R pipelines to (i) run Monte‑Carlo simulations, (ii) construct prior and imprecision metrics, and (iii) estimate Regression‑Discontinuity (RD) effects on homeowners’ behaviour and retrofit outcomes. A reusable SQL view is provided to reproduce the cleaned micro‑dataset from the raw EPC database.
 
