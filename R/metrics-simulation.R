@@ -26,6 +26,13 @@ df <- df %>%
     periode_construction = as.factor(periode_construction),
     type_energie_chauffage = as.factor(type_energie_chauffage))
 
+df_filtered <- df %>%
+  filter(!is_dpe_remplacant)
+
+dpe_classes <- c(0, 70, 110, 180, 250, 330, 420, 800)
+dpe_thresholds <- c(70, 110, 180, 250, 330, 420)
+dpe_classes_colors <- c("darkgreen", "forestgreen","green", "gold", "orange", "darkorange", "red")
+
 simulation_results_CSV <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_simulation_scott.csv")
 
 # 1. Fonctions utilitaires ----
