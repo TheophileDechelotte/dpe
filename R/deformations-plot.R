@@ -7,6 +7,7 @@ library(ggplot2)
 library(scales)
 library(dplyr)
 library(gridExtra)
+library(ggpattern)
 
 df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_metrics_scott_v4.csv")
 
@@ -38,60 +39,134 @@ summarise(
          !is.na(shop_def_420)) %>%
   ungroup()
 
-# Fonction helper
-plot_deformations_stacked <- function(type_logement_sel,
-                                     periode_construction_sel,
-                                     type_energie_chauffage_sel) {
-  # 1) filtre
-  df_sel <- df %>%
-    filter(type_logement       == type_logement_sel,
+
+plot_deformation <- function(type_logement_sel,
+                                             periode_construction_sel,
+                                             type_energie_chauffage_sel) {
+  
+  # 1) grab your one‐row summary
+  df_sel <- df_summary %>%
+    filter(type_logement        == type_logement_sel,
            periode_construction == periode_construction_sel,
            type_energie_chauffage == type_energie_chauffage_sel)
   
-  # 2) passage en “long” et extraction des colonnes metric & cutoff
-  df_long <- df_sel %>%
-    pivot_longer(
-      cols = matches("^(prior|cert_def|shop_def)_"),
-      names_to    = c("metric", "cutoff"),
-      names_pattern = "(prior|cert_def|shop_def)_(\\d+)",
-      values_to   = "value"
+  # 2) build a single long df with both “before” and “after”
+  df_plot <- bind_rows(
+    # → “before” (the left‐hand bars: prior / cert_def / shop_def)
+    df_sel %>%
+      pivot_longer(
+        cols = matches("^(prior|cert_def|shop_def)_"),
+        names_to      = c("metric","cutoff"),
+        names_pattern = "(prior|cert_def|shop_def)_(\\d+)",
+        values_to     = "value"
+      ) %>%
+      mutate(
+        cutoff   = factor(cutoff,
+                          levels = c("250","330","420")),
+        category = factor(metric,
+                          levels = c("shop_def", "cert_def", "prior"),
+                          labels = c("Shopping (+)",
+                                     "Certification (+)",
+                                     "Baseline (efficient)")),
+        side     = "before"
+      ) %>%
+      select(cutoff, category, value, side),
+    
+    # → “after” (the right‐hand bars: remaining / removed by cert / removed by shop)
+    tibble(
+      cutoff = factor(c("250","330","420"),
+                      levels = c("250","330","420")),
+      Remaining     = c(
+        1 - df_sel$prior_250 - df_sel$cert_def_250 - df_sel$shop_def_250,
+        1 - df_sel$prior_330 - df_sel$cert_def_330 - df_sel$shop_def_330,
+        1 - df_sel$prior_420 - df_sel$cert_def_420 - df_sel$shop_def_420
+      ),
+      `Removed: Cert` = c(df_sel$cert_def_250,
+                         df_sel$cert_def_330,
+                         df_sel$cert_def_420),
+      `Removed: Shop` = c(df_sel$shop_def_250,
+                         df_sel$shop_def_330,
+                         df_sel$shop_def_420)
     ) %>%
+      pivot_longer(-cutoff,
+                   names_to  = "segment",
+                   values_to = "value") %>%
+      mutate(
+        category = factor(segment,
+                          levels = c("Removed: Shop",
+                                     "Removed: Cert",
+                                     "Remaining"),
+                          labels = c("Shopping (-)",
+                                     "Certification (-)",
+                                     "Remaining (inefficient)")),
+        side     = "after"
+      ) %>%
+      select(cutoff, category, value, side)
+  )
+  
+  # 3) compute numeric x positions so we can dodge left/right
+  df_plot <- df_plot %>%
     mutate(
-      # pour ordonner le stacking bottom→top
-      metric = factor(metric,
-                      levels = c("shop_def", "cert_def","prior"),
-                      labels = c("Shop_def", "Cert_def", "Prior")),
-      # remettre cutoff dans l’ordre 250,330,420
-      cutoff = factor(cutoff,
-                      levels = c("250","330","420"),
-                      labels = c("Seuil 250 kWh/m².an",
-                                 "Seuil 330 kWh/m².an",
-                                 "Seuil 420 kWh/m².an"))
+      x_pos = as.numeric(cutoff) + if_else(side == "before", -0.2, +0.2)
     )
   
-  df_counts <- df_long %>%
-    group_by(cutoff, metric) %>%
-    summarise(
-      value = mean(value, na.rm = TRUE),
-      .groups = "drop")
-  
-  # 4) tracer le stacked‐bar
-  ggplot(df_counts, aes(x = cutoff, y = value, fill = metric)) +
-    geom_col() +
+  # 4) single ggplot call
+  ggplot(df_plot,
+         aes(x = x_pos, y = value,
+             fill  = category,
+             color = category)) +
+    geom_col(width = 0.35) +
+    scale_x_continuous(
+      breaks = 1:3,
+      labels = c("D/E", "E/F", "F/G")
+    ) +
+    scale_color_manual(
+      values = c(
+        "Certification (-)" = "orange",
+        "Shopping (-)"      = "red",
+        "Baseline (efficient)"          = "grey50",
+        "Certification (+)" = "orange",
+        "Shopping (+)"      = "red",
+        "Remaining (inefficient)"         = "grey"
+      )
+    ) +
+    scale_fill_manual(
+      breaks = c("Baseline (efficient)",
+                 "Certification (+)",
+                 "Shopping (+)",
+                 "Remaining (inefficient)",
+                 "Certification (-)",
+                 "Shopping (-)"),
+      values = c(
+        "Baseline (efficient)"          = "grey50",
+        "Certification (+)" = "orange",
+        "Shopping (+)"      = "red",
+        "Remaining (inefficient)"         = "grey",
+        "Certification (-)" = "white",
+        "Shopping (-)"      = "white"
+      )
+    ) +
     labs(
-      x = NULL,
-      y = "Effectif",
+      title = paste0("EPCs deformations [", type_logement_sel, ", ",periode_construction_sel, ", ", type_energie_chauffage_sel, "]"),
+      x    = "Cutoff",
+      y    = "Share",
       fill = NULL
     ) +
     theme_bw() +
+    guides(color = "none") +
+    ylim(0, 1) +
     theme(
-      axis.text.x     = element_text(face = "bold"),
+      axis.text.x       = element_text(face = "bold"),
       panel.grid.major.x = element_blank(),
-      legend.position = "right"
+      legend.position    = "right"
     )
+  ggsave(paste0("graphs/shopping-outcome/", type_logement_sel, "_", periode_construction_sel, "_", type_energie_chauffage_sel, "_deformations.png"), width = 8, height = 6)
 }
 
-plot_deformations_stacked(
-  type_logement = "appartement",
-  periode_construction = "avant 1948",
-  type_energie_chauffage = "Electricite")
+
+plot_deformation(
+  type_logement_sel        = "appartement",
+  periode_construction_sel = "avant 1948",
+  type_energie_chauffage_sel = "Gaz"
+)
+
