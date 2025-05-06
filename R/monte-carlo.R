@@ -4,7 +4,7 @@ library(ggplot2)
 library(scales)
 library(dplyr)
 
-df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_v2.csv")
+df <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_v2.csv")
 print(summary(df))
 
 # Regroupement des types d'énergie
