@@ -2,38 +2,32 @@
 library(rdrobust)
 library(rddensity)
 library(tidyverse)
-library(readr)
 library(ggplot2)
-library(scales)
 library(dplyr)
 
-df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_metrics_scott_v3.csv")
+df <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_group_metrics_scott.csv")
 
 df$type_logement <- factor(df$type_logement)
 df$periode_construction <- factor(df$periode_construction)
 df$type_energie_chauffage <- factor(df$type_energie_chauffage)
 
 # Create the energy_efficient variable (1 if ep_conso_5_usages_m2 <= 330, otherwise 0)
-df <- df %>% mutate(shopping = if_else(interval_dpe_remplacant <= 90, 1, 0, missing = 0)) %>%
+df <- df %>% mutate(pre_shopping = if_else(interval_dpe_remplacant <= 90, 1, 0, missing = 0)) %>%
              filter(prior_330 < 1,
                     epsilon_330 <= 1) %>%
-             select(ep_conso_5_usages_m2, shopping, prior_330, epsilon_330)
-
-df <- df %>%
-  filter(ep_conso_5_usages_m2 >= 250,
-         ep_conso_5_usages_m2 < 420)
+             select(ep_conso_5_usages_m2, pre_shopping, prior_330, epsilon_330)
 
 # 1. Primary RD estimation (local linear, triangular kernel) ----
 
 out_rd <- rdrobust(
-  y = df$shopping,
+  y = df$pre_shopping,
   x = df$ep_conso_5_usages_m2,
   c = 330, p = 1, kernel = "triangular"
 )
 summary(out_rd)  # Displays the RD estimate and robust confidence interval
 
 out_rd_plot <- rdplot(
-  y = df$shopping, 
+  y = df$pre_shopping, 
   x = round(df$ep_conso_5_usages_m2), 
   c = 330.001, p = 1, kernel = "triangular", 
   title = "Shopping RD estimate (330)",
@@ -70,14 +64,14 @@ rdplotdensity(dens_trim,
 
 # 3.b) RD estimate using donut sample
 out_rd_donut <- rdrobust(
-  y = df_donut$shopping,
+  y = df_donut$pre_shopping,
   x = df_donut$ep_conso_5_usages_m2,
   c = 330, p = 1, kernel = "triangular"
 )
 summary(out_rd_donut)
 
 out_rd_plot <- rdplot(
-  y = df_donut$shopping, 
+  y = df_donut$pre_shopping, 
   x = round(df_donut$ep_conso_5_usages_m2), 
   c = 330.001, p = 1, kernel = "triangular", 
   title = "Shopping RD estimate (330)",
@@ -93,7 +87,7 @@ for (delta_alt in c(3, 5, 8, 10)) {
   df_tmp <- df %>%
     filter(abs(ep_conso_5_usages_m2 - 330) > delta_alt)
   out_tmp <- rdrobust(
-    y = df_tmp$shopping,
+    y = df_tmp$pre_shopping,
     x = df_tmp$ep_conso_5_usages_m2,
     c = 330, p = 1, kernel = "triangular"
   )
@@ -146,7 +140,7 @@ ggsave("graphs/covariate-balance-epsilon-330-donut.png", width = 8, height = 6)
 # 6. Primary RD estimation with covariates (local linear, triangular kernel) ----
 
 out_rd_cov <- rdrobust(
-  y = df_donut$shopping,
+  y = df_donut$pre_shopping,
   x = df_donut$ep_conso_5_usages_m2,
   covs = cbind(df_donut$prior_330, df_donut$epsilon_330),
   c = 330, p = 1, kernel = "triangular"
@@ -154,7 +148,7 @@ out_rd_cov <- rdrobust(
 summary(out_rd_cov)  # Displays the RD estimate and robust confidence interval
 
 out_rd_cov_plot <- rdplot(
-  y = df_donut$shopping, 
+  y = df_donut$pre_shopping, 
   x = round(df_donut$ep_conso_5_usages_m2), 
   c = 330.001, p = 1, kernel = "triangular", 
   covs = cbind(df_donut$prior_330, df_donut$epsilon_330),
@@ -175,7 +169,7 @@ rd_bin <- map_dfr(1:K, function(k) {
   # rows whose π̂ falls into bin k
   in_bin <- df$prior_330 >= q[k] & df$prior_330 < q[k + 1] & !is.na(df$prior_330)
   if (sum(in_bin) < 200) return(NULL)  # skip tiny bins
-  fit <- rdrobust(df$shopping[in_bin], df$ep_conso_5_usages_m2[in_bin], c = 330.001, p = 1, kernel = "triangular")
+  fit <- rdrobust(df$pre_shopping[in_bin], df$ep_conso_5_usages_m2[in_bin], c = 330.001, p = 1, kernel = "triangular")
   tibble(bin          = k,
          prior_mean   = mean(df$prior_330[in_bin], na.rm = TRUE),
          tau_hat      = fit$Estimate[1],
@@ -208,7 +202,7 @@ rd_bin_eps <- map_dfr(1:K_eps, function(k) {
   in_bin <- df$epsilon_330 >= q_eps[k] & df$epsilon_330 < q_eps[k + 1] & 
             !is.na(df$epsilon_330)
   if (sum(in_bin) < 200) return(NULL)  # skip bins that are too small
-  fit <- rdrobust(df$shopping[in_bin],
+  fit <- rdrobust(df$pre_shopping[in_bin],
                   df$ep_conso_5_usages_m2[in_bin],
                   c = 330.001, p = 1, kernel = "triangular")
   tibble(bin          = k,
