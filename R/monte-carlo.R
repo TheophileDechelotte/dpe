@@ -192,7 +192,7 @@ visualisation <- function(filtered_data, selected_simulation) {
                 aes(x = total, y= after_stat(density), color = "Virtual EPCs"),
                 binwidth = 1, 
                 linewidth = 0.5) +
-  labs(title = paste0("Simulated EPC distribution (", x, ", ", y, ", ", z, ") (n = ", nrow(filtered_data), ")"),
+  labs(title = paste0("Simulated EPC distribution (n = ", nrow(filtered_data), ")"),
        x = "Energy consumption (kWh/m²)",
        y = "Density") +
   scale_fill_manual(
@@ -228,7 +228,7 @@ group_simulation_results <- df_filtered %>%
   })
 
 # Enregistrer le résultat
-write_csv(group_simulation_results, "data/group_simulation_scott.csv")
+write_csv(group_simulation_results, "C:\\Users\\tdechelotte\\Desktop\\group_simulation_scott.csv")
 
 # Visualisation ----
 
@@ -240,7 +240,7 @@ visualisation_group(df_filtered, group_simulation_results, "maison individuelle"
 
 simulation_results <- simulate_group(df_filtered, n_sim = 1e6)
 
-write_csv(simulation_results, "data/simulation_scott.csv")
+write_csv(simulation_results, "C:\\Users\\tdechelotte\\Desktop\\simulation_scott.csv")
 
 visualisation(df_filtered, simulation_results)
 
