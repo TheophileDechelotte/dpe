@@ -7,9 +7,9 @@ library(dplyr)
 
 
 # Lire les données
-df <- read_csv("C:\\Users\\TEMP.MINES-PARISTECH.007\\OneDrive - Université Paris Sciences et Lettres\\dpe-data\\alldpe_v2.csv")
+df <- read_csv("C:\\Users\\TEMP.MINES-PARISTECH.008\\OneDrive - Université Paris Sciences et Lettres\\dpe-data\\alldpe_v2.csv")
 
-simulation_results_CSV <- read_csv("C:\\Users\\TEMP.MINES-PARISTECH.007\\OneDrive - Université Paris Sciences et Lettres\\dpe-data\\alldpe_simulation_scott.csv")
+simulation_results_CSV <- read_csv("C:\\Users\\TEMP.MINES-PARISTECH.008\\OneDrive - Université Paris Sciences et Lettres\\dpe-data\\alldpe_simulation_scott.csv")
 
 # Regroupement des types d'énergie
 df <- df %>%
