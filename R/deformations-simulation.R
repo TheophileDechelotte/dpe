@@ -288,8 +288,6 @@ write_csv(df_subgroup_metrics, "data/alldpe_metrics_scott_v4.csv")
 
 # Compute prior and epsilon for the full dataset ----
 
-df_metrics <- df
-
 # For the 250–420 window with threshold 330
 metrics330 <- get_metrics(
   sim_df                   = simulation_results_CSV,
@@ -303,9 +301,6 @@ metrics330 <- get_metrics(
 
 print(summary(metrics330))
 
-df_metrics <- df_metrics %>%
-  left_join(metrics330)
-
 metrics250 <- get_metrics(
   sim_df                   = simulation_results_CSV,
   real_df                  = df_shopping,
@@ -316,9 +311,6 @@ metrics250 <- get_metrics(
   binwidth  = 1
 )
 print(summary(metrics250))
-
-df_metrics <- df_metrics %>%
-  left_join(metrics250)
 
 metrics420 <- get_metrics(
   sim_df                   = simulation_results_CSV,
@@ -331,8 +323,11 @@ metrics420 <- get_metrics(
 )
 print(summary(metrics420))
 
-df_metrics <- df_metrics %>%
-  left_join(metrics420)
+df_metrics <- cbind(
+  metrics330,
+  metrics250,
+  metrics420
+)
 
 # Enregistrer le résultat
 write_csv(df_metrics, "data/alldpe_metrics_scott_v5.csv")
