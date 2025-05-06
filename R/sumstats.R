@@ -20,9 +20,9 @@ df_certif <- df %>%
   filter(!is_dpe_remplacant)
 
 simulation_results <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_simulation_scott.csv")
+simulation_results <- simulation_results %>% filter(total <= 800)
 
-
-breaks <- seq(0, 800, by = 1)
+breaks <- seq(0, 800, by = 2)
 
 # helper to compute mids and densities
 get_hist <- function(x){
@@ -54,7 +54,7 @@ df_diff <- h_baseline %>%
 # now plot
 ggplot(df_diff, aes(x = x, y = density_diff, color = comparison)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
-  geom_line(linewidth = 0.7) +
+  geom_line(linewidth = 0.5) +
   geom_vline(xintercept = dpe_thresholds, linetype = "dotted", color = "black", linewidth = 0.2) +
   scale_color_manual(values = c(
     "1st certification – Baseline" = "orange",
