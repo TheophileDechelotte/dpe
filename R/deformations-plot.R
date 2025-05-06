@@ -9,24 +9,26 @@ library(dplyr)
 library(gridExtra)
 library(ggpattern)
 
-df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_metrics_scott_v4.csv")
+df_subgroup <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_metrics_scott_v4.csv")
 
-df$type_logement <- factor(df$type_logement)
-df$periode_construction <- factor(df$periode_construction)
-df$type_energie_chauffage <- factor(df$type_energie_chauffage)
+df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_metrics_scott_v5.csv")
 
-df_summary <- df %>% group_by(type_logement, periode_construction, type_energie_chauffage) %>%
-summarise(
-        prior_330 = mean(prior_330, na.rm = TRUE),
-        cert_def_330 = mean(cert_def_330, na.rm = TRUE),
-        shop_def_330 = mean(shop_def_330, na.rm = TRUE),
-        prior_250 = mean(prior_250, na.rm = TRUE),
-        cert_def_250 = mean(cert_def_250, na.rm = TRUE),
-        shop_def_250 = mean(shop_def_250, na.rm = TRUE),
-        prior_420 = mean(prior_420, na.rm = TRUE),
-        cert_def_420 = mean(cert_def_420, na.rm = TRUE),
-        shop_def_420 = mean(shop_def_420, na.rm = TRUE), 
-        .groups = "drop") %>%
+df_subgroup$type_logement <- factor(df_subgroup$type_logement)
+df_subgroup$periode_construction <- factor(df_subgroup$periode_construction)
+df_subgroup$type_energie_chauffage <- factor(df_subgroup$type_energie_chauffage)
+
+df_subgroup_summary <- df_subgroup %>% group_by(type_logement, periode_construction, type_energie_chauffage) %>%
+  summarise(
+          prior_330 = mean(prior_330, na.rm = TRUE),
+          cert_def_330 = mean(cert_def_330, na.rm = TRUE),
+          shop_def_330 = mean(shop_def_330, na.rm = TRUE),
+          prior_250 = mean(prior_250, na.rm = TRUE),
+          cert_def_250 = mean(cert_def_250, na.rm = TRUE),
+          shop_def_250 = mean(shop_def_250, na.rm = TRUE),
+          prior_420 = mean(prior_420, na.rm = TRUE),
+          cert_def_420 = mean(cert_def_420, na.rm = TRUE),
+          shop_def_420 = mean(shop_def_420, na.rm = TRUE), 
+          .groups = "drop") %>%
   select(type_logement, periode_construction, type_energie_chauffage, prior_330, cert_def_330, shop_def_330, prior_250, cert_def_250, shop_def_250, prior_420, cert_def_420, shop_def_420) %>%
   filter(!is.na(prior_330) &
          !is.na(cert_def_330) &
@@ -39,13 +41,24 @@ summarise(
          !is.na(shop_def_420)) %>%
   ungroup()
 
+df_summary <- df %>%
+  filter(!is.na(prior_330) &
+         !is.na(cert_def_330) &
+         !is.na(shop_def_330) &
+         !is.na(prior_250) &
+         !is.na(cert_def_250) &
+         !is.na(shop_def_250) &
+         !is.na(prior_420) &
+         !is.na(cert_def_420) &
+         !is.na(shop_def_420))
 
-plot_deformation <- function(type_logement_sel,
+
+plot_subgroup_deformation <- function(type_logement_sel,
                                              periode_construction_sel,
                                              type_energie_chauffage_sel) {
   
   # 1) grab your one‐row summary
-  df_sel <- df_summary %>%
+  df_sel <- df_subgroup_summary %>%
     filter(type_logement        == type_logement_sel,
            periode_construction == periode_construction_sel,
            type_energie_chauffage == type_energie_chauffage_sel)
@@ -164,9 +177,10 @@ plot_deformation <- function(type_logement_sel,
 }
 
 
-plot_deformation(
+plot_subgroup_deformation(
   type_logement_sel        = "appartement",
   periode_construction_sel = "avant 1948",
   type_energie_chauffage_sel = "Gaz"
 )
 
+plot_deformation <- function()
