@@ -17,9 +17,9 @@ df_subgroup$type_logement <- factor(df_subgroup$type_logement)
 df_subgroup$periode_construction <- factor(df_subgroup$periode_construction)
 df_subgroup$type_energie_chauffage <- factor(df_subgroup$type_energie_chauffage)
 
-df_subgroup_summary <- df_subgroup %>% group_by(type_logement, periode_construction, type_energie_chauffage) %>%
-  summarise(
-          prior_330 = mean(prior_330, na.rm = TRUE),
+df_subgroup_summary <- df_subgroup %>% 
+  group_by(type_logement, periode_construction, type_energie_chauffage) %>%
+  summarise(prior_330 = mean(prior_330, na.rm = TRUE),
           cert_def_330 = mean(cert_def_330, na.rm = TRUE),
           shop_def_330 = mean(shop_def_330, na.rm = TRUE),
           prior_250 = mean(prior_250, na.rm = TRUE),
@@ -174,7 +174,7 @@ plot_subgroup_deformation <- function(type_logement_sel,
       legend.position    = "right"
     )
   ggsave(paste0("graphs/shopping-outcome/", type_logement_sel, "_", periode_construction_sel, "_", type_energie_chauffage_sel, "_deformations.png"), width = 8, height = 6)
-}
+  }
 
 
 plot_subgroup_deformation(
@@ -183,4 +183,6 @@ plot_subgroup_deformation(
   type_energie_chauffage_sel = "Gaz"
 )
 
-plot_deformation <- function()
+plot_deformation <- function(
+
+)
