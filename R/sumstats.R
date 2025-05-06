@@ -4,9 +4,9 @@ library(scales)
 
 
 # Lire les données
-df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_v2.csv")
+df <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_v2.csv")
 
-simulation_results_CSV <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_simulation_scott.csv")
+simulation_results_CSV <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_simulation_scott.csv")
 
 dpe_thresholds <- c(70, 110, 180, 250, 330, 420)
 
