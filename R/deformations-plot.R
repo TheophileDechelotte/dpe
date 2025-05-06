@@ -9,15 +9,15 @@ library(dplyr)
 library(gridExtra)
 library(ggpattern)
 
-df_subgroup <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_metrics_scott_v4.csv")
+df_subgroup_metrics <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_metrics_scott_v4.csv")
 
-df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_metrics_scott_v5.csv")
+df_metrics <- read_csv("C:\\Users\\tdechelotte\\Desktop\\deformation_metrics_scott.csv")
 
-df_subgroup$type_logement <- factor(df_subgroup$type_logement)
-df_subgroup$periode_construction <- factor(df_subgroup$periode_construction)
-df_subgroup$type_energie_chauffage <- factor(df_subgroup$type_energie_chauffage)
+df_subgroup_metrics$type_logement <- factor(df_subgroup_metrics$type_logement)
+df_subgroup_metrics$periode_construction <- factor(df_subgroup_metrics$periode_construction)
+df_subgroup_metrics$type_energie_chauffage <- factor(df_subgroup_metrics$type_energie_chauffage)
 
-df_subgroup_summary <- df_subgroup %>% 
+df_subgroup_summary <- df_subgroup_metrics %>% 
   group_by(type_logement, periode_construction, type_energie_chauffage) %>%
   summarise(prior_330 = mean(prior_330, na.rm = TRUE),
           cert_def_330 = mean(cert_def_330, na.rm = TRUE),
@@ -41,7 +41,7 @@ df_subgroup_summary <- df_subgroup %>%
          !is.na(shop_def_420)) %>%
   ungroup()
 
-df_summary <- df %>%
+df_summary <- df_metrics %>%
   filter(!is.na(prior_330) &
          !is.na(cert_def_330) &
          !is.na(shop_def_330) &
@@ -63,7 +63,7 @@ plot_subgroup_deformation <- function(type_logement_sel,
            periode_construction == periode_construction_sel,
            type_energie_chauffage == type_energie_chauffage_sel)
   
-  # 2) build a single long df with both “before” and “after”
+  # 2) build a single long df_metrics with both “before” and “after”
   df_plot <- bind_rows(
     # → “before” (the left‐hand bars: prior / cert_def / shop_def)
     df_sel %>%
@@ -182,6 +182,7 @@ plot_subgroup_deformation(
   periode_construction_sel = "avant 1948",
   type_energie_chauffage_sel = "Gaz"
 )
+
 
 plot_deformation <- function(df_sel) {
 
