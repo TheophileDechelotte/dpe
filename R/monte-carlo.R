@@ -166,11 +166,11 @@ visualisation_group <- function(real_data, sim_data, x, y, z) {
        x = "Energy consumption (kWh/m²)",
        y = "Density") +
   scale_fill_manual(
-      name   = "Distribution",
+      name   = NULL,
       values = c("Real EPCs" = "orange")
     ) +
     scale_color_manual(
-      name   = "Distribution",
+      name   = NULL,
       values = c("Virtual EPCs" = "#0073ff")
     ) +
   xlim(0, 800) +
@@ -196,11 +196,11 @@ visualisation <- function(filtered_data, selected_simulation) {
        x = "Energy consumption (kWh/m²)",
        y = "Density") +
   scale_fill_manual(
-      name   = "Distribution",
+      name   = NULL,
       values = c("Real EPCs" = "orange")
     ) +
     scale_color_manual(
-      name   = "Distribution",
+      name   = NULL,
       values = c("Virtual EPCs" = "#0073ff")
     ) +
   xlim(0, 800) +
