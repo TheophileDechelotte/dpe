@@ -138,7 +138,7 @@ simulate_group <- function(data, n_sim = 1000000) {
 }
 
 # Fonction pour visualiser la simulation du sous-groupe souhaité
-visualisation <- function(real_data, sim_data, x, y, z) {
+visualisation_group <- function(real_data, sim_data, x, y, z) {
   # Filtrer les données pour le sous-groupe
   selected_simulation <- sim_data %>%
     filter(type_logement == x,
@@ -179,11 +179,40 @@ visualisation <- function(real_data, sim_data, x, y, z) {
   ggsave(paste0("graphs/", x, "_", y, "_", z, "_simulation.png"), width = 8, height = 6)
 }
 
+# Fonction pour visualiser la simulation du sous-groupe souhaité
+visualisation <- function(filtered_data, selected_simulation) {
+  # Créer l'histogramme
+  ggplot() +
+  geom_vline(xintercept = dpe_thresholds, linetype = "dashed", color = "black", linewidth = 0.2) +
+  geom_histogram(data = filtered_data,
+                 aes(x = ep_conso_5_usages_m2, y = after_stat(density), fill = "Real EPCs"),
+                 binwidth = 1,
+                 position = "identity") +
+  geom_freqpoly(data = selected_simulation, 
+                aes(x = total, y= after_stat(density), color = "Virtual EPCs"),
+                binwidth = 1, 
+                linewidth = 0.5) +
+  labs(title = paste0("Simulated EPC distribution (", x, ", ", y, ", ", z, ") (n = ", nrow(filtered_data), ")"),
+       x = "Energy consumption (kWh/m²)",
+       y = "Density") +
+  scale_fill_manual(
+      name   = "Distribution",
+      values = c("Real EPCs" = "orange")
+    ) +
+    scale_color_manual(
+      name   = "Distribution",
+      values = c("Virtual EPCs" = "#0073ff")
+    ) +
+  xlim(0, 800) +
+  theme_bw()
+
+  ggsave(paste0("graphs/simulation.png"), width = 8, height = 6)
+}
 
 # 2. Simulation par sous-groupe ----
 
 # On regroupe selon les trois variables de segmentation
-simulation_results <- df_filtered %>%
+group_simulation_results <- df_filtered %>%
   group_by(type_logement, periode_construction, type_energie_chauffage) %>%
   group_modify(~ {
     if(nrow(.x) < 100) {
@@ -198,14 +227,20 @@ simulation_results <- df_filtered %>%
     }
   })
 
-
 # Enregistrer le résultat
-write_csv(simulation_results, "data/alldpe_simulation_scott.csv")
+write_csv(group_simulation_results, "data/group_simulation_scott.csv")
 
 # Visualisation ----
 
 # Exemple d'utilisation de la fonction de visualisation
-visualisation(df_filtered, simulation_results, "maison individuelle", "1978-1982", "Gaz")
+visualisation_group(df_filtered, group_simulation_results, "maison individuelle", "1978-1982", "Gaz")
 
 
+# 3. Simulation de l'ensemble des données ----
+
+simulation_results <- simulate_group(df_filtered, n_sim = 1e6)
+
+write_csv(simulation_results, "data/simulation_scott.csv")
+
+visualisation(df_filtered, simulation_results)
 
