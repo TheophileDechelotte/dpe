@@ -22,31 +22,49 @@ df_certif <- df %>%
 simulation_results <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_simulation_scott.csv")
 
 
-dpe_thresholds <- c(70, 110, 180, 250, 330, 420)
+breaks <- seq(0, 800, by = 1)
 
-ggplot() +
-  geom_vline(xintercept = dpe_thresholds, linetype = "dashed", color = "black", linewidth = 0.2) +
-  geom_freqpoly(data = df_certif,
-                 aes(x = ep_conso_5_usages_m2, y = after_stat(density), color = "1st certification"),
-                 binwidth = 2,
-                 linewidth = 0.5) +
-  geom_freqpoly(data = df_shopping,
-                 aes(x = ep_conso_5_usages_m2, y = after_stat(density), color = "Post shopping"),
-                 binwidth = 2,
-                 linewidth = 0.5) +
-  geom_freqpoly(data = simulation_results, 
-                aes(x = total, y= after_stat(density), color = "Baseline"),
-                binwidth = 2, 
-                linewidth = 0.5) +
-  labs(x = "Energy consumption (kWh/m²)",
-       y = "Density") +
-  scale_color_manual(
-      name   = NULL,
-      values = c("Baseline" = "#0073ff",
-                "1st certification" = "orange",
-                "Post shopping" = "red")
-    ) +
-  xlim(0, 800) +
+# helper to compute mids and densities
+get_hist <- function(x){
+  h <- hist(x, breaks = breaks, plot = FALSE, freq = FALSE)
+  tibble(
+    x = h$mids,
+    density = h$density
+  )
+}
+
+# compute per‐group histograms
+h_baseline       <- get_hist(simulation_results$total)
+h_first_certif   <- get_hist(df_certif$ep_conso_5_usages_m2)
+h_post_shopping  <- get_hist(df_shopping$ep_conso_5_usages_m2)
+
+# join and compute differences
+df_diff <- h_baseline %>%
+  rename(d_baseline = density) %>%
+  left_join(h_first_certif   %>% rename(d_first   = density), by = "x") %>%
+  left_join(h_post_shopping  %>% rename(d_post    = density), by = "x") %>%
+  replace_na(list(d_first = 0, d_post = 0)) %>%
+  transmute(
+    x,
+    `1st certification – Baseline` = d_first - d_baseline,
+    `Post shopping – Baseline`    = d_post  - d_baseline
+  ) %>%
+  pivot_longer(-x, names_to = "comparison", values_to = "density_diff")
+
+# now plot
+ggplot(df_diff, aes(x = x, y = density_diff, color = comparison)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+  geom_line(linewidth = 0.7) +
+  geom_vline(xintercept = dpe_thresholds, linetype = "dotted", color = "black", linewidth = 0.2) +
+  scale_color_manual(values = c(
+    "1st certification – Baseline" = "orange",
+    "Post shopping – Baseline"     = "red"
+  )) +
+  labs(
+    x     = "Energy consumption (kWh/m²)",
+    y     = "Density difference",
+    color = NULL
+  ) +
   theme_bw()
 
 ggsave("graphs/deformations_plot.png", width = 8, height = 6)
