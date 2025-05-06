@@ -31,12 +31,12 @@ df <- df %>%
     type_energie_chauffage = as.factor(type_energie_chauffage))
 
 # Filtrage des DPE actifs et transformation en facteurs pour la segmentation
-df_filtered <- df %>%
+df_shopping <- df %>%
   filter(is_dpe_remplacant,
          !is_ancien_dpe,
          interval_ancien_dpe <= 90)
 
-df_bfore_shopping <- df %>%
+df_certif <- df %>%
   filter(!is_dpe_remplacant)
 
 dpe_classes <- c(0, 70, 110, 180, 250, 330, 420, 800)
@@ -253,8 +253,8 @@ plot_prior_eps_box <- function(metrics_df, win_tag) {
 df_subgroup_metrics <- df
 
 subgroup_metrics330 <- get_subgroup_metrics(sim_df  = simulation_results_CSV,
-                                            real_df = df_filtered,
-                                            real_data_bfore_shopping = df_bfore_shopping,
+                                            real_df = df_shopping,
+                                            real_data_bfore_shopping = df_certif,
                                             lower = 250, upper = 420,
                                             threshold = 330)
 
@@ -264,8 +264,8 @@ df_subgroup_metrics <- df_subgroup_metrics %>%
   left_join(subgroup_metrics330, by = c("type_logement", "periode_construction", "type_energie_chauffage"))
 
 subgroup_metrics250 <- get_subgroup_metrics(sim_df  = simulation_results_CSV,
-                                            real_df = df_filtered,
-                                            real_data_bfore_shopping = df_bfore_shopping,
+                                            real_df = df_shopping,
+                                            real_data_bfore_shopping = df_certif,
                                             lower = 180, upper = 330,
                                             threshold = 250)
 
@@ -275,8 +275,8 @@ df_subgroup_metrics <- df_subgroup_metrics %>%
   left_join(subgroup_metrics250, by = c("type_logement", "periode_construction", "type_energie_chauffage"))
 
 subgroup_metrics420 <- get_subgroup_metrics(sim_df  = simulation_results_CSV,
-                                            real_df = df_filtered,
-                                            real_data_bfore_shopping = df_bfore_shopping,
+                                            real_df = df_shopping,
+                                            real_data_bfore_shopping = df_certif,
                                             lower = 330, upper = 800,
                                             threshold = 420)
 
@@ -296,8 +296,8 @@ df_metrics <- df
 # For the 250–420 window with threshold 330
 metrics330 <- get_metrics(
   sim_df                   = simulation_results_CSV,
-  real_df                  = df_filtered,
-  real_data_bfore_shopping = df_bfore_shopping,
+  real_df                  = df_shopping,
+  real_data_bfore_shopping = df_certif,
   lower     = 250,
   upper     = 420,
   threshold = 330,
@@ -311,8 +311,8 @@ df_metrics <- df_metrics %>%
 
 metrics250 <- get_metrics(
   sim_df                   = simulation_results_CSV,
-  real_df                  = df_filtered,
-  real_data_bfore_shopping = df_bfore_shopping,
+  real_df                  = df_shopping,
+  real_data_bfore_shopping = df_certif,
   lower     = 180,
   upper     = 330,
   threshold = 250,
@@ -325,8 +325,8 @@ df_metrics <- df_metrics %>%
 
 metrics420 <- get_metrics(
   sim_df                   = simulation_results_CSV,
-  real_df                  = df_filtered,
-  real_data_bfore_shopping = df_bfore_shopping,
+  real_df                  = df_shopping,
+  real_data_bfore_shopping = df_certif,
   lower     = 330,
   upper     = 800,
   threshold = 420,
