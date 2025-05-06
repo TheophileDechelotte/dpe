@@ -122,10 +122,6 @@ compute_epsilon <- function(real_data,
                               upper     = upper,
                               threshold = threshold)
 
-  shopping_deformation <- (prior_star - prior_star2)
-  certification_deformation <- (prior_star2 - prior_sim)
-  epsilon_shopping <- (prior_star - prior_star2)/(1 - prior_star2)
-
   certification_deformation <- (prior_star2 - prior_sim)
   shopping_deformation      <- (prior_star  - prior_star2)
   epsilon_shopping          <- shopping_deformation / (1 - prior_star2)
