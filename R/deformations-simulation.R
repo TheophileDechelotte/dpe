@@ -324,12 +324,12 @@ metrics420 <- get_metrics(
 print(summary(metrics420))
 
 df_metrics <- cbind(
-  metrics330,
   metrics250,
+  metrics330,
   metrics420
 )
 
 # Enregistrer le résultat
-write_csv(df_metrics, "data/alldpe_metrics_scott_v5.csv")
+write_csv(df_metrics, "/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_metrics_scott_v5.csv")
 
 
