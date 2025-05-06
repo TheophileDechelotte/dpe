@@ -4,9 +4,11 @@ library(scales)
 
 
 # Lire les données
-df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_v2.csv")
+df <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_v2.csv")
 
-simulation_results_CSV <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_simulation_scott.csv")
+group_simulation_results <- read_csv("C:\\Users\\tdechelotte\\Desktop\\group_simulation_scott.csv")
+
+simulation_results <- read_csv("C:\\Users\\tdechelotte\\Desktop\\simulation_scott.csv")
 
 # Regroupement des types d'énergie
 df <- df %>%
@@ -249,7 +251,7 @@ plot_prior_eps_box <- function(metrics_df, win_tag) {
 # Initialize the df_subgroup_metrics dataframe
 df_subgroup_metrics <- df
 
-subgroup_metrics330 <- get_subgroup_metrics(sim_df  = simulation_results_CSV,
+subgroup_metrics330 <- get_subgroup_metrics(sim_df  = group_simulation_results,
                                             real_df = df_shopping,
                                             real_data_bfore_shopping = df_certif,
                                             lower = 250, upper = 420,
@@ -260,7 +262,7 @@ print(summary(subgroup_metrics330))
 df_subgroup_metrics <- df_subgroup_metrics %>%
   left_join(subgroup_metrics330, by = c("type_logement", "periode_construction", "type_energie_chauffage"))
 
-subgroup_metrics250 <- get_subgroup_metrics(sim_df  = simulation_results_CSV,
+subgroup_metrics250 <- get_subgroup_metrics(sim_df  = group_simulation_results,
                                             real_df = df_shopping,
                                             real_data_bfore_shopping = df_certif,
                                             lower = 180, upper = 330,
@@ -271,7 +273,7 @@ print(summary(subgroup_metrics250))
 df_subgroup_metrics <- df_subgroup_metrics %>%
   left_join(subgroup_metrics250, by = c("type_logement", "periode_construction", "type_energie_chauffage"))
 
-subgroup_metrics420 <- get_subgroup_metrics(sim_df  = simulation_results_CSV,
+subgroup_metrics420 <- get_subgroup_metrics(sim_df  = group_simulation_results,
                                             real_df = df_shopping,
                                             real_data_bfore_shopping = df_certif,
                                             lower = 330, upper = 800,
@@ -283,14 +285,14 @@ df_subgroup_metrics <- df_subgroup_metrics %>%
   left_join(subgroup_metrics420, by = c("type_logement", "periode_construction", "type_energie_chauffage"))
 
 # Enregistrer le résultat
-write_csv(df_subgroup_metrics, "data/alldpe_metrics_scott_v4.csv")
+write_csv(df_subgroup_metrics, "C:\\Users\\tdechelotte\\Desktop\\group_deformation_metrics_scott.csv")
 
 
 # Compute prior and epsilon for the full dataset ----
 
 # For the 250–420 window with threshold 330
 metrics330 <- get_metrics(
-  sim_df                   = simulation_results_CSV,
+  sim_df                   = simulation_results,
   real_df                  = df_shopping,
   real_data_bfore_shopping = df_certif,
   lower     = 250,
@@ -302,7 +304,7 @@ metrics330 <- get_metrics(
 print(summary(metrics330))
 
 metrics250 <- get_metrics(
-  sim_df                   = simulation_results_CSV,
+  sim_df                   = simulation_results,
   real_df                  = df_shopping,
   real_data_bfore_shopping = df_certif,
   lower     = 180,
@@ -310,10 +312,11 @@ metrics250 <- get_metrics(
   threshold = 250,
   binwidth  = 1
 )
+
 print(summary(metrics250))
 
 metrics420 <- get_metrics(
-  sim_df                   = simulation_results_CSV,
+  sim_df                   = simulation_results,
   real_df                  = df_shopping,
   real_data_bfore_shopping = df_certif,
   lower     = 330,
@@ -321,6 +324,7 @@ metrics420 <- get_metrics(
   threshold = 420,
   binwidth  = 1
 )
+
 print(summary(metrics420))
 
 df_metrics <- cbind(
@@ -330,6 +334,6 @@ df_metrics <- cbind(
 )
 
 # Enregistrer le résultat
-write_csv(df_metrics, "/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_metrics_scott_v5.csv")
+write_csv(df_metrics, "C:\\Users\\tdechelotte\\Desktop\\deformation_metrics_scott.csv")
 
 
