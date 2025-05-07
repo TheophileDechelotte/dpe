@@ -18,18 +18,6 @@ df <- df %>% mutate(pre_shopping = if_else(interval_dpe_remplacant <= 90, 1, 0, 
              filter(prior_330 < 1,epsilon_330 <= 1,prior_250 < 1, epsilon_250 <= 1, prior_420 < 1, epsilon_420 <= 1) %>%
              select(ep_conso_5_usages_m2, pre_shopping, post_shopping, diff_indicator, prior_330, epsilon_330, prior_250, epsilon_250, prior_420, epsilon_420)
 
-df <- df %>% 
-  mutate(
-    cutoff = cut(
-      ep_conso_5_usages_m2,
-      breaks = c(10, 290, 375, 800),
-      labels = c(250, 330, 420),
-      right  = FALSE
-    )
-  ) %>% 
-  mutate(cutoff = as.numeric(as.character(cutoff))) %>%
-  filter(!is.na(cutoff))
-
 cutoffs <- c(250, 330, 420)
 delta <- 10 # width of the donut
 df_donut <- df %>%
@@ -37,18 +25,38 @@ df_donut <- df %>%
          abs(ep_conso_5_usages_m2 - 250) > delta,
          abs(ep_conso_5_usages_m2 - 420) > delta)
 
-# 1. Primary RD estimation (local linear, triangular kernel) ----
+# 1) Define the cutoffs and their windows
+windows <- tibble(
+  cutoff = c(250, 330, 420),
+  lower  = c(180, 250, 330),
+  upper  = c(330, 420, 800)
+)
 
+# 2) Stack the data: one row per obs × cutoff
+df_long <- df_donut %>%
+  mutate(obs_id = row_number()) %>%       # unique ID for clustering
+  crossing(windows) %>%                   # all obs × all cutoffs
+  filter(
+    ep_conso_5_usages_m2 >= lower,
+    ep_conso_5_usages_m2 <= upper
+  ) %>%
+  group_by(obs_id) %>%
+  mutate(w = 1 / n()) %>%                 # equal total weight per household
+  ungroup()
+
+# 3) Run multi‐cutoff RD with weights & clustering
 res_mc <- rdmc(
-  Y          = df_donut$post_shopping,
-  X          = df_donut$ep_conso_5_usages_m2,
-  C          = df_donut$cutoff,
-  pvec       = rep(1, length(cutoffs)),           # local-lin
-  kernelvec  = rep("triangular", length(cutoffs)),# triangular kernel
+  Y          = df_long$post_shopping,
+  X          = df_long$ep_conso_5_usages_m2,
+  C          = df_long$cutoff,
+  pvec       = rep(1, nrow(windows)),           # local‐linear at each cutoff
+  kernelvec  = rep("triangular", nrow(windows)),
+  weightsvec = rep("w", nrow(windows)),         # use our w column
+  cluster    = df_long$obs_id,                  # cluster SEs by household
   verbose    = TRUE
 )
 
-print(res_mc)  # pooled + cutoff-specific τ̂, SEs, CIs  [oai_citation:1‡CRAN](https://cran.r-project.org/web/packages/rdmulti/rdmulti.pdf)
+print(res_mc)
 
 #––– 2. Multi-cutoff RD plot
 rdmcplot(
