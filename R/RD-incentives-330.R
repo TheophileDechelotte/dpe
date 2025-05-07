@@ -29,7 +29,10 @@ summary(out_rd)  # Displays the RD estimate and robust confidence interval
 out_rd_plot <- rdplot(
   y = df$pre_shopping, 
   x = round(df$ep_conso_5_usages_m2), 
-  c = 330.001, p = 1, kernel = "triangular", 
+  c = 330, p = 1, kernel = "triangular", 
+  h = 26.068,
+  x.lim = c(300, 360),
+  y.lim = c(0.07, 0.13),
   title = "Shopping RD estimate (330)",
   x.label = "Energy consumption (kWh/m²)",
   y.label = "Shopping"
@@ -74,6 +77,9 @@ out_rd_plot <- rdplot(
   y = df_donut$pre_shopping, 
   x = round(df_donut$ep_conso_5_usages_m2), 
   c = 330.001, p = 1, kernel = "triangular", 
+  h = 26.068,
+  x.lim = c(300, 360),
+  y.lim = c(0.07, 0.13),
   title = "Shopping RD estimate (330)",
   x.label = "Energy consumption (kWh/m²)",
   y.label = "Shopping"
@@ -158,7 +164,6 @@ out_rd_cov_plot <- rdplot(
 )
 
 ggsave("graphs/RD-shopping-estimate-cov-donut.png", width = 8, height = 6)
-
 
 # 7. RD estimation across prior (π) heterogeneity ----
 
