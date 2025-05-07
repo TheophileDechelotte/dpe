@@ -10,10 +10,6 @@ library(splines)
 
 df2 <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/data-dpe/alldpe_metrics_scott_v3.csv")
 
-# Add the ancien_dpe_ep_conso_5_usages_m2 variable
-df2$ancien_dpe_ep_conso_5_usages_m2 <- 
-  df2$ep_conso_5_usages_m2[ match(df2$ancien_dpe_id, df2$id) ]
-
 df2$type_logement <- factor(df2$type_logement)
 df2$periode_construction <- factor(df2$periode_construction)
 df2$type_energie_chauffage <- factor(df2$type_energie_chauffage)
