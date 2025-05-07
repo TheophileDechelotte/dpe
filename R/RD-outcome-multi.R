@@ -38,7 +38,7 @@ df_long <- df_donut %>%
   crossing(windows) %>%                   # all obs × all cutoffs
   filter(
     ep_conso_5_usages_m2 >= lower,
-    ep_conso_5_usages_m2 <= upper
+    ep_conso_5_usages_m2 < upper
   ) %>%
   group_by(obs_id) %>%
   mutate(w = 1 / n()) %>%                 # equal total weight per household
