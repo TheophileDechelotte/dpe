@@ -73,13 +73,13 @@ out_rd_donut <- rdrobust(
 )
 summary(out_rd_donut)
 
-out_rd_plot <- rdplot(
+out_rd_donut_plot <- rdplot(
   y = df_donut$pre_shopping, 
   x = round(df_donut$ep_conso_5_usages_m2), 
-  c = 330.001, p = 1, kernel = "triangular", 
-  h = 26.068,
-  x.lim = c(300, 360),
-  y.lim = c(0.07, 0.13),
+  c = 330, p = 1, kernel = "triangular", 
+  h = 62.263,
+  x.lim = c(265, 395),
+  y.lim = c(0.075, 0.125),
   title = "Shopping RD estimate (330)",
   x.label = "Energy consumption (kWh/m²)",
   y.label = "Shopping"
@@ -156,8 +156,11 @@ summary(out_rd_cov)  # Displays the RD estimate and robust confidence interval
 out_rd_cov_plot <- rdplot(
   y = df_donut$pre_shopping, 
   x = round(df_donut$ep_conso_5_usages_m2), 
-  c = 330.001, p = 1, kernel = "triangular", 
+  c = 330, p = 1, kernel = "triangular", 
   covs = cbind(df_donut$prior_330, df_donut$epsilon_330),
+  h = 59.975,
+  x.lim = c(270, 390),
+  y.lim = c(0.07, 0.13),
   title = "Shopping RD estimate with covariates (330)",
   x.label = "Energy consumption (kWh/m²)",
   y.label = "Shopping"
