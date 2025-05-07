@@ -105,16 +105,19 @@ for (delta_alt in c(3, 5, 8, 10)) {
 # 4. Covariate balance check ('prior_330') ----
 
 out_prior <- rdrobust(
-  y = df_donut$prior_330, 
-  x = df_donut$ep_conso_5_usages_m2, 
+  y = df$prior_330, 
+  x = df$ep_conso_5_usages_m2, 
   c = 330, p = 1, kernel = "triangular"
 )
 summary(out_prior)
 
 out_prior_plot <- rdplot(
-  y = df_donut$prior_330, 
-  x = round(df_donut$ep_conso_5_usages_m2), 
+  y = df$prior_330, 
+  x = round(df$ep_conso_5_usages_m2), 
   c = 330, p = 1, kernel = "triangular", 
+  h = 59.975,
+  x.lim = c(250, 420),
+  y.lim = c(0.07, 0.13),
   title = "Covariate balance check (prior_330)",
   x.label = "Energy consumption (kWh/m²)",
   y.label = "Prior belief (330)"
@@ -135,7 +138,10 @@ summary(out_imprecision)
 out_imprecision_plot <- rdplot(
   y = df_donut$epsilon_330, 
   x = round(df_donut$ep_conso_5_usages_m2), 
-  c = 330.001, p = 1, kernel = "triangular", 
+  c = 330, p = 1, kernel = "triangular", 
+  h = 59.975,
+  x.lim = c(250, 420),
+  y.lim = c(0.07, 0.13),
   title = "Covariate balance check (epsilon_330)",
   x.label = "Energy consumption (kWh/m²)",
   y.label = "Imprecision (ε) (330)"
