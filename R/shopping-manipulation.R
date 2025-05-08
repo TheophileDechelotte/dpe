@@ -16,6 +16,11 @@ df_shopping <- df %>%
          !is_ancien_dpe,
          interval_ancien_dpe <= 90)
 
+df_shopping30 <- df %>%
+  filter(is_dpe_remplacant,
+         !is_ancien_dpe,
+         interval_ancien_dpe <= 30)
+
 df_certif <- df %>%
   filter(!is_dpe_remplacant)
 
@@ -27,6 +32,9 @@ certif_simulation <- certif_simulation %>% filter(total <= 800)
 
 post_shopping_simulation <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_post_shopping.csv")
 post_shopping_simulation <- post_shopping_simulation %>% filter(total <= 800)
+
+post_shopping_simulation30 <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_post_shopping30.csv")
+post_shopping_simulation30 <- post_shopping_simulation30 %>% filter(total <= 800)
 
 last_certif_simulation <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_last_certif.csv")
 last_certif_simulation <- last_certif_simulation %>% filter(total <= 800)
@@ -111,14 +119,16 @@ ggsave("graphs/deformation_post_vs_first.png", width = 8, height = 6)
 h_first_certif   <- get_hist(df_certif$ep_conso_5_usages_m2)
 h_post_shopping  <- get_hist(df_shopping$ep_conso_5_usages_m2)
 h_last_certif    <- get_hist(df_last_certif$ep_conso_5_usages_m2)
+h_post_shopping30 <- get_hist(df_shopping30$ep_conso_5_usages_m2)
 
 h_first_certif_baseline   <- get_hist(certif_simulation$total)
 h_post_shopping_baseline  <- get_hist(post_shopping_simulation$total)
 h_last_certif_baseline    <- get_hist(last_certif_simulation$total)
+h_post_shopping30_baseline <- get_hist(post_shopping_simulation30$total)
 
-h_obs      <- h_post_shopping
+h_obs      <- h_post_shopping30
 
-h_baseline <- h_post_shopping_baseline 
+h_baseline <- h_post_shopping30_baseline 
 
 # 2. Compute density difference (observed – baseline)
 df_cmp <- h_obs %>%
@@ -142,9 +152,9 @@ fg_threshold <- dpe_thresholds[6]  # 420
 cd_threshold <- dpe_thresholds[3]  # 180
 gg_threshold <- 800
 
-threshold <- fg_threshold
-prev_threshold <- ef_threshold
-next_threshold <- gg_threshold
+threshold <- de_threshold
+prev_threshold <- cd_threshold
+next_threshold <- ef_threshold
 
 # 5. Excess mass just below E/F (250 ≤ x < 330)
 excess_mass <- df_cmp %>%

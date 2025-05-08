@@ -30,7 +30,7 @@ df <- df %>%
 df_filtered <- df %>%
   filter(is_dpe_remplacant,
          !is_ancien_dpe,
-         interval_ancien_dpe <= 90)
+         interval_ancien_dpe <= 30)
 
 dpe_classes <- c(0, 70, 110, 180, 250, 330, 420, 800)
 dpe_thresholds <- c(70, 110, 180, 250, 330, 420)
@@ -242,7 +242,7 @@ visualisation_group(df_filtered, group_simulation_results, "maison individuelle"
 
 simulation_results <- simulate_group(df_filtered, n_sim = 1e6)
 
-write_csv(simulation_results, "/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_post_shopping.csv")
+write_csv(simulation_results, "/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_post_shopping30.csv")
 
 visualisation(df_filtered, simulation_results)
 
