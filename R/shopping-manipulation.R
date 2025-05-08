@@ -39,7 +39,7 @@ post_shopping_simulation30 <- post_shopping_simulation30 %>% filter(total <= 800
 last_certif_simulation <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_last_certif.csv")
 last_certif_simulation <- last_certif_simulation %>% filter(total <= 800)
 
-breaks <- seq(0, 800, by = 1)
+breaks <- seq(0, 800, by = 4)
 dpe_thresholds <- c(70, 110, 180, 250, 330, 420)
 
 # helper to compute mids and densities
@@ -50,70 +50,6 @@ get_hist <- function(x){
     density = h$density
   )
 }
-
-# compute per‐group histograms
-h_baseline       <- get_hist(certif_simulation$total)
-h_first_certif   <- get_hist(df_certif$ep_conso_5_usages_m2)
-h_post_shopping  <- get_hist(df_shopping$ep_conso_5_usages_m2)
-
-# join and compute differences
-df_diff <- h_baseline %>%
-  rename(d_baseline = density) %>%
-  left_join(h_first_certif   %>% rename(d_first   = density), by = "x") %>%
-  left_join(h_post_shopping  %>% rename(d_post    = density), by = "x") %>%
-  replace_na(list(d_first = 0, d_post = 0)) %>%
-  transmute(
-    x,
-    `Post shopping – Baseline`    = d_post  - d_baseline,
-    `1st certification – Baseline` = d_first - d_baseline
-  ) %>%
-  pivot_longer(-x, names_to = "comparison", values_to = "density_diff")
-
-
-# now plot
-ggplot(df_diff, aes(x = x, y = density_diff, fill = comparison)) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
-  geom_col(width = 4, alpha = 0.7, position = "identity") +
-  geom_vline(xintercept = dpe_thresholds, linetype = "dotted", color = "black", linewidth = 0.2) +
-  scale_fill_manual(values = c(
-    "1st certification – Baseline" = "orange",
-    "Post shopping – Baseline"     = "red"
-  )) +
-  labs(
-    x     = "Energy consumption (kWh/m²)",
-    y     = "Density difference",
-    fill = NULL
-  ) +
-  theme_bw()
-
-ggsave("graphs/deformation_hist.png", width = 8, height = 6)
-
-
-h_post_vs_first <- h_first_certif %>% 
-  rename(d_first = density) %>% 
-  left_join(h_post_shopping  %>% rename(d_post  = density), by = "x") %>% 
-  replace_na(list(d_post = 0)) %>% 
-  transmute(
-    x,
-    density_diff = d_post - d_first
-  )
-
-ggplot(h_post_vs_first, aes(x = x, y = density_diff)) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
-  geom_col(width = 4, fill = "blue", alpha = 0.7) +
-  geom_vline(xintercept = dpe_thresholds, linetype = "dotted", color = "black", linewidth = 0.2) +
-  xlim(0, 600) +
-  labs(
-    x     = "Energy consumption (kWh/m²)",
-    y     = "Density difference (Post shopping – 1st certification)",
-    title = "Post-shopping vs 1st-certification density shift"
-  ) +
-  theme_bw()
-
-ggsave("graphs/deformation_post_vs_first.png", width = 8, height = 6)
-
-
-# Compute % surclassés E→F with simulation_results as baseline ----
 
 # 1. Build histograms on the same breaks
 h_first_certif   <- get_hist(df_certif$ep_conso_5_usages_m2)
@@ -179,4 +115,47 @@ cat(sprintf("Excess mass just below threshold:  %.4f (%.2f%% of total certificat
 cat(sprintf("Total observed mass previous class:    %.4f (%.2f%% of total certificates)\n",
             total_mass, total_mass * 100))
 cat(sprintf("Estimated %% surclassés at threshold: %.2f%%\n", pct_surclasse))
+
+
+# 1. Compute “adjusted” density differences for each series
+certif_diff <- h_first_certif_baseline %>%
+  rename(d_base = density) %>%
+  left_join(h_first_certif %>% rename(d_first = density), by = "x") %>%
+  replace_na(list(d_first = 0, d_base = 0)) %>%
+  transmute(
+    x,
+    diff_first = d_first - d_base
+  )
+
+shopping_diff <- h_post_shopping_baseline %>%
+  rename(d_base = density) %>%
+  left_join(h_post_shopping %>% rename(d_post = density), by = "x") %>%
+  replace_na(list(d_post = 0, d_base = 0)) %>%
+  transmute(
+    x,
+    diff_post = d_post - d_base
+  )
+
+# 2. Join on x only, then compute final difference
+shopping_certif_diff <- full_join(certif_diff, shopping_diff, by = "x") %>%
+  replace_na(list(diff_first = 0, diff_post = 0)) %>%
+  transmute(
+    x,
+    density_diff = diff_post - diff_first
+  )
+
+# 3. Plot
+ggplot(shopping_certif_diff, aes(x = x, y = density_diff)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+  geom_col(width = 4, fill = "blue", alpha = 0.7) +
+  geom_vline(xintercept = dpe_thresholds, linetype = "dotted", color = "black", linewidth = 0.2) +
+  coord_cartesian(xlim = c(0, 600)) +
+  labs(
+    x     = "Energy consumption (kWh/m²)",
+    y     = "Density difference (Post shopping – 1st certification)",
+    title = "Post-shopping vs 1st-certification manipulation shift"
+  ) +
+  theme_bw()
+
+ggsave("graphs/deformation_post_vs_first.png", width = 8, height = 6)
 
