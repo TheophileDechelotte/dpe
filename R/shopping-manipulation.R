@@ -22,8 +22,14 @@ df_certif <- df %>%
 df_last_certif <- df %>%
   filter(!desactive)
 
-simulation_results <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott.csv")
-simulation_results <- simulation_results %>% filter(total <= 800)
+certif_simulation <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott.csv")
+certif_simulation <- certif_simulation %>% filter(total <= 800)
+
+post_shopping_simulation <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_post_shopping.csv")
+post_shopping_simulation <- post_shopping_simulation %>% filter(total <= 800)
+
+last_certif_simulation <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_last_certif.csv")
+last_certif_simulation <- last_certif_simulation %>% filter(total <= 800)
 
 breaks <- seq(0, 800, by = 1)
 dpe_thresholds <- c(70, 110, 180, 250, 330, 420)
@@ -38,7 +44,7 @@ get_hist <- function(x){
 }
 
 # compute per‐group histograms
-h_baseline       <- get_hist(simulation_results$total)
+h_baseline       <- get_hist(certif_simulation$total)
 h_first_certif   <- get_hist(df_certif$ep_conso_5_usages_m2)
 h_post_shopping  <- get_hist(df_shopping$ep_conso_5_usages_m2)
 
@@ -102,9 +108,17 @@ ggsave("graphs/deformation_post_vs_first.png", width = 8, height = 6)
 # Compute % surclassés E→F with simulation_results as baseline ----
 
 # 1. Build histograms on the same breaks
-h_obs      <- get_hist(df_shopping$ep_conso_5_usages_m2)      # observed
-h_baseline <- get_hist(df_certif$ep_conso_5_usages_m2) 
-#h_baseline <- get_hist(simulation_results$total)              # theoretical
+h_first_certif   <- get_hist(df_certif$ep_conso_5_usages_m2)
+h_post_shopping  <- get_hist(df_shopping$ep_conso_5_usages_m2)
+h_last_certif    <- get_hist(df_last_certif$ep_conso_5_usages_m2)
+
+h_first_certif_baseline   <- get_hist(certif_simulation$total)
+h_post_shopping_baseline  <- get_hist(post_shopping_simulation$total)
+h_last_certif_baseline    <- get_hist(last_certif_simulation$total)
+
+h_obs      <- h_post_shopping
+
+h_baseline <- h_post_shopping_baseline 
 
 # 2. Compute density difference (observed – baseline)
 df_cmp <- h_obs %>%
@@ -128,9 +142,9 @@ fg_threshold <- dpe_thresholds[6]  # 420
 cd_threshold <- dpe_thresholds[3]  # 180
 gg_threshold <- 800
 
-threshold <- de_threshold
-prev_threshold <- cd_threshold
-next_threshold <- ef_threshold
+threshold <- fg_threshold
+prev_threshold <- ef_threshold
+next_threshold <- gg_threshold
 
 # 5. Excess mass just below E/F (250 ≤ x < 330)
 excess_mass <- df_cmp %>%

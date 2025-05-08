@@ -242,7 +242,7 @@ visualisation_group(df_filtered, group_simulation_results, "maison individuelle"
 
 simulation_results <- simulate_group(df_filtered, n_sim = 1e6)
 
-write_csv(simulation_results, "/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_last_certif.csv")
+write_csv(simulation_results, "/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_post_shopping.csv")
 
 visualisation(df_filtered, simulation_results)
 
