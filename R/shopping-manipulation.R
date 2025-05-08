@@ -4,7 +4,7 @@ library(scales)
 
 
 # Lire les données
-df <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_v2.csv")
+df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/alldpe_v2.csv")
 
 df <- df %>%
   mutate(
@@ -19,10 +19,11 @@ df_shopping <- df %>%
 df_certif <- df %>%
   filter(!is_dpe_remplacant)
 
-simulation_results <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_simulation_scott.csv")
+simulation_results <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott.csv")
 simulation_results <- simulation_results %>% filter(total <= 800)
 
-breaks <- seq(0, 800, by = 2)
+breaks <- seq(0, 800, by = 4)
+dpe_thresholds <- c(70, 110, 180, 250, 330, 420)
 
 # helper to compute mids and densities
 get_hist <- function(x){
@@ -51,6 +52,7 @@ df_diff <- h_baseline %>%
   ) %>%
   pivot_longer(-x, names_to = "comparison", values_to = "density_diff")
 
+
 # now plot
 ggplot(df_diff, aes(x = x, y = density_diff, color = comparison)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
@@ -68,5 +70,29 @@ ggplot(df_diff, aes(x = x, y = density_diff, color = comparison)) +
   theme_bw()
 
 ggsave("graphs/deformations_plot.png", width = 8, height = 6)
+
+
+h_post_vs_first <- h_first_certif %>% 
+  rename(d_first = density) %>% 
+  left_join(h_post_shopping  %>% rename(d_post  = density), by = "x") %>% 
+  replace_na(list(d_post = 0)) %>% 
+  transmute(
+    x,
+    density_diff = d_post - d_first
+  )
+
+ggplot(h_post_vs_first, aes(x = x, y = density_diff)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+  geom_col(width = 4, fill = "blue", alpha = 0.7) +
+  geom_vline(xintercept = dpe_thresholds, linetype = "dotted", color = "black", linewidth = 0.2) +
+  xlim(0, 600) +
+  labs(
+    x     = "Energy consumption (kWh/m²)",
+    y     = "Density difference (Post shopping – 1st certification)",
+    title = "Post-shopping vs 1st-certification density shift"
+  ) +
+  theme_bw()
+
+ggsave("graphs/deformation_post_vs_first.png", width = 8, height = 6)
 
 
