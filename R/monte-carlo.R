@@ -28,9 +28,10 @@ df <- df %>%
 
 # Filtrage des DPE actifs et transformation en facteurs pour la segmentation
 df_filtered <- df %>%
-  filter(is_dpe_remplacant,
-         !is_ancien_dpe,
-         interval_ancien_dpe <= 30)
+  filter(!desactive) %>%
+  filter(type_logement == "appartement", 
+         periode_construction == "avant 1948", 
+         type_energie_chauffage == "Electricite")
 
 dpe_classes <- c(0, 70, 110, 180, 250, 330, 420, 800)
 dpe_thresholds <- c(70, 110, 180, 250, 330, 420)
@@ -242,7 +243,7 @@ visualisation_group(df_filtered, group_simulation_results, "maison individuelle"
 
 simulation_results <- simulate_group(df_filtered, n_sim = 1e6)
 
-write_csv(simulation_results, "/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_post_shopping30.csv")
+write_csv(simulation_results, "/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_last_certif_appartement_avant-1948_Electricite.csv")
 
 visualisation(df_filtered, simulation_results)
 
