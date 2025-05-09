@@ -53,47 +53,47 @@ compute_prior <- function(sim_data,
 # Compute epsilon: area where real density > sim density over [range_lower, range_upper].
 compute_epsilon <- function(real_data,
                             sim_data,
-                            lower = 250,
-                            upper = 420,
-                            threshold = 330,
-                            binwidth  = 1) {
-  sim_window  <- sim_data  %>% filter(total >= lower,
-                                       total <  upper)
-  real_window <- real_data %>% filter(ep_conso_5_usages_m2 >= lower,
-                                       ep_conso_5_usages_m2 <  upper)
+                            lower      = 250,
+                            upper      = 420,
+                            threshold  = 330,
+                            binwidth   = 1) {
+
+  # 0. Keep only the window we’re analysing -------------------------------
+  sim_window  <- sim_data  %>% filter(total                 >= lower,
+                                      total                 <  upper)
+  real_window <- real_data %>% filter(ep_conso_5_usages_m2  >= lower,
+                                      ep_conso_5_usages_m2  <  upper)
 
   if (nrow(sim_window) == 0 || nrow(real_window) == 0)
-      return(NA_real_)
-    
+    return(NA_real_)
+
+  # 1. Histograms on *identical* breaks ----------------------------------
   breaks_seq <- seq(lower, upper, by = binwidth)
 
   h_sim  <- hist(sim_window$total,
                  breaks = breaks_seq,
                  plot   = FALSE,
-                 prob   = TRUE)           # density integrates to 1
+                 prob   = TRUE)            # density integrates to 1
   h_real <- hist(real_window$ep_conso_5_usages_m2,
                  breaks = breaks_seq,
                  plot   = FALSE,
                  prob   = TRUE)
 
-  dens_sim  <- h_sim$density
-  dens_real <- h_real$density
-  mids      <- h_real$mids              # same for both histograms
-  dens_star <- ifelse(mids < threshold,
-                      pmax(dens_real, dens_sim),
-                      pmin(dens_real, dens_sim))
+  dens_sim   <- h_sim$density
+  dens_real  <- h_real$density
+  mids       <- h_real$mids              # common mid-points
 
-  # normalise (f* may not integrate to 1 after max/min step)
-  total_mass   <- sum(dens_star) * binwidth
-  if (total_mass == 0) return(NA_real_)
-  dens_star    <- dens_star / total_mass
-  prior_star <- sum(dens_star[mids < threshold]) * binwidth
-  prior_sim  <- compute_prior(sim_window,
-                              lower     = lower,
-                              upper     = upper,
-                              threshold = threshold)
-  epsilon <- (prior_star - prior_sim)/(1 - prior_sim)
+  # 2. Positive density gap (observed – baseline) ------------------------
+  diff_pos <- pmax(dens_real - dens_sim, 0)
 
+  # 3. “Excess” mass just *before* and *after* the boundary --------------
+  excess_before <- sum(diff_pos[mids <  threshold]) * binwidth
+
+  # 4. Total observed mass in the class right *after* the boundary -------
+  denom <- sum(dens_sim[mids >= threshold]) * binwidth
+  if (denom == 0) return(NA_real_)
+
+  epsilon <- excess_before / denom        # 0–1; ×100 for %
   return(epsilon)
 }
 
