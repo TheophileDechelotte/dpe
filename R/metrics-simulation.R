@@ -6,7 +6,7 @@ library(dplyr)
 
 # 0. Chargement des données ----
 
-df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_v2.csv")
+df <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_v2.csv")
 
 df <- df %>%
   mutate(
@@ -33,7 +33,7 @@ dpe_classes <- c(0, 70, 110, 180, 250, 330, 420, 800)
 dpe_thresholds <- c(70, 110, 180, 250, 330, 420)
 dpe_classes_colors <- c("darkgreen", "forestgreen","green", "gold", "orange", "darkorange", "red")
 
-simulation_results_CSV <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/dpe-data/alldpe_simulation_scott.csv")
+simulation_results_CSV <- read_csv("C:\\Users\\tdechelotte\\Desktop\\group_simulation_scott.csv")
 
 # 1. Fonctions utilitaires ----
 
@@ -88,9 +88,12 @@ compute_epsilon <- function(real_data,
 
   # 3. “Excess” mass just *before* and *after* the boundary --------------
   excess_before <- sum(diff_pos[mids <  threshold]) * binwidth
+  excess_after <- sum(diff_pos[mids >=  threshold]) * binwidth
 
   # 4. Total observed mass in the class right *after* the boundary -------
-  denom <- sum(dens_sim[mids >= threshold]) * binwidth
+  total_after <- sum(dens_real[mids >= threshold]) * binwidth
+  
+  denom <- excess_before + total_after - excess_after
   if (denom == 0) return(NA_real_)
 
   epsilon <- excess_before / denom        # 0–1; ×100 for %
@@ -224,4 +227,4 @@ df_metrics <- df_metrics %>%
 
 # 3. Enregistrer le résultat ----
 
-write_csv(df_metrics, "data/alldpe_metrics_scott_v3.csv")
+write_csv(df_metrics, "alldpe_group_metrics_scott_new.csv")
