@@ -122,18 +122,18 @@ out_prior <- rdrobust(
 summary(out_prior)
 
 out_prior_plot <- rdplot(
-  y = df$prior_330, 
-  x = df$ep_conso_5_usages_m2, 
+  y = df_donut$prior_330, 
+  x = df_donut$ep_conso_5_usages_m2, 
   c = 330, p = 1, kernel = "triangular", 
   nbins = 150, ci = 0.95,
-  h = 14.392,
-  x.lim = c(310, 350),
+  h = 101.949,
+  x.lim = c(230, 430),
   y.lim = c(0.6, 0.8),
   title = "Covariate balance check (prior_330)",
   x.label = "Energy consumption (kWh/m²)",
   y.label = "Prior belief (330)"
 )
-ggsave("graphs/covariate-balance-prior-330.png", width = 8, height = 6)
+ggsave("graphs/covariate-balance-prior-330-donut.png", width = 8, height = 6)
 
 
 # 5. Covariate balance check ('epsilon_330') ----
