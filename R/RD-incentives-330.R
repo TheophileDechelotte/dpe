@@ -147,8 +147,8 @@ out_imprecision <- rdrobust(
 summary(out_imprecision)
 
 out_imprecision_plot <- rdplot(
-  y = df$epsilon_330, 
-  x = df$ep_conso_5_usages_m2, 
+  y = df_donut$epsilon_330, 
+  x = df_donut$ep_conso_5_usages_m2, 
   c = 330, p = 1, kernel = "triangular", 
   nbins = 150, ci = 0.95,
   h = 12.170,
