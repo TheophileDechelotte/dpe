@@ -139,8 +139,8 @@ ggsave("graphs/covariate-balance-prior-330-donut.png", width = 8, height = 6)
 # 5. Covariate balance check ('epsilon_330') ----
 
 out_imprecision <- rdrobust(
-  y = df_donut$epsilon_330, 
-  x = df_donut$ep_conso_5_usages_m2, 
+  y = df$epsilon_330, 
+  x = df$ep_conso_5_usages_m2, 
   c = 330, p = 1, kernel = "triangular"
 )
 
