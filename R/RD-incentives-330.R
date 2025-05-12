@@ -235,12 +235,44 @@ ggsave("graphs/heterogeneous_RD_prior.png", width = 8, height = 6)
 ols_unw <- lm(tau ~ prior_330, data = rd_by_prior)
 summary(ols_unw)
 
-eps     <- 1e-10
+rd_by_prior_clean <- rd_by_prior %>%
+  filter(se > 0)
+
 ols_w   <- lm(tau ~ prior_330,
-              data    = rd_by_prior,
-              weights = 1 / (se^2 + eps))
+              data    = rd_by_prior_clean,
+              weights = 1 / (se^2))
 
 summary(ols_w)
+
+
+# 1. Base ggplot call on your df
+p <- ggplot(rd_by_prior, aes(x = prior_330, y = tau)) +
+
+  # 2. One geom_point mapping size to inverse variance
+  geom_point(aes(size = 1/(se^2 + eps_small))) +
+
+  # 3. A weighted linear fit via the weight aesthetic in geom_smooth
+  geom_smooth(
+    method = "lm",
+    aes(weight = 1/(se^2 + eps_small)),
+    se = TRUE
+  ) +
+
+  # 4. Clean up
+  labs(
+    x = "Prior belief (π)",
+    y = "RD jump estimate τ(π)",
+    title = "Heterogeneous RD effect by prior belief",
+    size = "Precision\nweight"
+  ) +
+  theme_bw()
+
+# 5. Print it
+print(p)
+
+# 6. Save it
+ggsave("graphs/heterogeneous_RD_prior_weighted.png", width = 8, height = 6)
+
 
 # 8. RD estimation across imprecision (ε) heterogeneity ----
 
@@ -295,3 +327,43 @@ ggplot(rd_by_imprecision, aes(x = epsilon_330, y = tau)) +
 
 ggsave("graphs/heterogeneous_RD_imprecision.png", width = 8, height = 6)
 
+# 1. Unweighted OLS
+ols_unw_eps <- lm(tau ~ epsilon_330, data = rd_by_imprecision)
+summary(ols_unw_eps)
+
+# 2. Precision‐weighted OLS (add small eps to avoid Inf)
+rd_by_imprecision_clean <- rd_by_imprecision %>%
+  filter(se > 0)
+
+ols_w_eps   <- lm(tau ~ epsilon_330,
+                  data    = rd_by_imprecision_clean,
+                  weights = 1 / (se^2))
+summary(ols_w_eps)
+
+# 1. Base ggplot call on your df
+p <- ggplot(rd_by_imprecision, aes(x = epsilon_330, y = tau)) +
+
+  # 2. One geom_point mapping size to inverse variance
+  geom_point(aes(size = 1/(se^2 + eps_small))) +
+
+  # 3. A weighted linear fit via the weight aesthetic in geom_smooth
+  geom_smooth(
+    method = "lm",
+    aes(weight = 1/(se^2 + eps_small)),
+    se = TRUE
+  ) +
+
+  # 4. Clean up
+  labs(
+    x = "Imprecision belief (ε)",
+    y = "RD jump estimate τ(ε)",
+    title = "Heterogeneous RD effect by imprecision",
+    size = "Precision\nweight"
+  ) +
+  theme_bw()
+
+# 5. Print it
+print(p)
+
+# 6. Save it
+ggsave("graphs/heterogeneous_RD_imprecision_weighted.png", width = 8, height = 6)
