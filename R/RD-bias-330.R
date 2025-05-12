@@ -109,10 +109,11 @@ summary(out_diff)
 # Graph of the difference-in-discontinuities (post-shopping − pre-shopping)
 rdplot(
   y       = df2$diff_indicator,
-  x       = round(df2$ep_conso_5_usages_m2),
-  c       = 330.001,        # tiny offset avoids tying exactly at 330
+  x       = df2$ep_conso_5_usages_m2,
+  c       = 330,        # tiny offset avoids tying exactly at 330
   p       = 1,
-  h = 48.643,
+  nbins   = 300, ci = 0.95,
+  h = 46.537,
   x.lim = c(280, 380),
   y.lim = c(-0.04, 0.04),
   kernel  = "triangular",
@@ -127,9 +128,9 @@ ggsave("graphs/RD-diff-shopping-estimate.png", width = 8, height = 6)
 # 5. Difference in RD estimation (local linear, triangular kernel) ----
 
 out_diff_donut <- rdrobust(
-  y      = df2_donut_filtered$diff_indicator,
-  x      = df2_donut_filtered$ep_conso_5_usages_m2,
-  c      = 330.001,
+  y      = df2_donut$diff_indicator,
+  x      = df2_donut$ep_conso_5_usages_m2,
+  c      = 330,
   p      = 1,               # local linear
   kernel = "triangular"
 )
