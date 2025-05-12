@@ -191,8 +191,11 @@ ggsave("graphs/RD-shopping-estimate-cov-donut.png", width = 8, height = 6)
 # 1. nest by unique prior_330
 rd_by_prior <- df_donut %>%
   # only keep prior‐values with at least, say, 50 obs on each side of the 330 cutoff
-  group_by(type_logement, type_energie_chauffage, periode_construction) %>%
-  filter(prior_330 < 1) %>%
+  group_by(prior_330) %>%
+  filter(
+    sum(ep_conso_5_usages_m2 <  330) >= 50,
+    sum(ep_conso_5_usages_m2 >= 330) >= 50
+  ) %>%
   nest() %>%                     # one row per prior_330, with a data.frame in "data"
   
   # 2. run rdrobust on each
