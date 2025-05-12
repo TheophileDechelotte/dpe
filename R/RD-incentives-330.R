@@ -14,7 +14,8 @@ df$type_energie_chauffage <- factor(df$type_energie_chauffage)
 # Create the energy_efficient variable (1 if ep_conso_5_usages_m2 <= 330, otherwise 0)
 df <- df %>% mutate(pre_shopping = if_else(interval_dpe_remplacant <= 90, 1, 0, missing = 0)) %>%
              filter(prior_330 < 1,
-                    epsilon_330 <= 1) %>%
+                    epsilon_330 <= 1,
+                    ep_conso_5_usages_m2 <= 750) %>%
              select(ep_conso_5_usages_m2, pre_shopping, prior_330, epsilon_330)
 
 # 1. Primary RD estimation (local linear, triangular kernel) ----
@@ -27,15 +28,13 @@ out_rd <- rdrobust(
 summary(out_rd)  # Displays the RD estimate and robust confidence interval
 
 out_rd_plot <- rdplot(
-  y = df$pre_shopping, 
-  x = df$ep_conso_5_usages_m2, 
-  binselect = "esmv", ci = 0.95,
-  scale = 0.01,
-  c = 330, p = 1, kernel = "triangular", 
+  y       = df$pre_shopping,
+  x       = df$ep_conso_5_usages_m2,
+  c       = 330, p = 1, kernel = "triangular",
+  nbins   = 300, ci = 0.95,
   h = 26.068,
-  x.lim = c(300, 360),
-  y.lim = c(0.07, 0.13),
-  title = "Shopping RD estimate (330)",
+  x.lim   = c(300, 360), y.lim = c(0.07, 0.13),
+  title   = "Shopping RD estimate (330)",
   x.label = "Energy consumption (kWh/m²)",
   y.label = "Shopping"
 )
@@ -47,7 +46,15 @@ ggsave("graphs/RD-shopping-estimate.png", width = 8, height = 6)
 
 dens <- rddensity(X = df$ep_conso_5_usages_m2, c = 330)
 summary(dens)
-rdplotdensity(dens, df$ep_conso_5_usages_m2)
+rdplotdensity(
+  dens,
+  df$ep_conso_5_usages_m2,
+  title  = "McCrary density test",
+  xlab  = "Energy consumption (kWh/m²)",
+  ylab  = "Density of observations"
+)
+
+ggsave("graphs/running-variable-continuity.png", width = 8, height = 6)
 
 
 # 3. Donut‑hole RD (trim ±delta kWh/m² around the cutoff) ---- 
@@ -79,6 +86,7 @@ out_rd_donut_plot <- rdplot(
   y = df_donut$pre_shopping, 
   x = round(df_donut$ep_conso_5_usages_m2), 
   c = 330, p = 1, kernel = "triangular", 
+  nbins = 290, ci = 0.95,
   h = 62.263,
   x.lim = c(265, 395),
   y.lim = c(0.075, 0.125),
