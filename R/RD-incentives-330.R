@@ -115,8 +115,8 @@ for (delta_alt in c(5, 8, 10)) {
 # 4. Covariate balance check ('prior_330') ----
 
 out_prior <- rdrobust(
-  y = df$prior_330, 
-  x = df$ep_conso_5_usages_m2, 
+  y = df_donut$prior_330, 
+  x = df_donut$ep_conso_5_usages_m2, 
   c = 330, p = 1, kernel = "triangular"
 )
 summary(out_prior)
@@ -126,9 +126,9 @@ out_prior_plot <- rdplot(
   x = df$ep_conso_5_usages_m2, 
   c = 330, p = 1, kernel = "triangular", 
   nbins = 150, ci = 0.95,
-  h = 59.975,
-  x.lim = c(250, 420),
-  y.lim = c(0.5, 0.9),
+  h = 14.392,
+  x.lim = c(310, 350),
+  y.lim = c(0.6, 0.8),
   title = "Covariate balance check (prior_330)",
   x.label = "Energy consumption (kWh/m²)",
   y.label = "Prior belief (330)"
