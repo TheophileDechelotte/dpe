@@ -243,37 +243,54 @@ ggsave("graphs/heterogeneous_RD_prior.png", width = 8, height = 6)
 
 # 8. RD estimation across imprecision (ε) heterogeneity ----
 
-K_eps <- 20  # number of equal‑frequency bins; adjust as needed
-q_eps <- quantile(df$epsilon_330, probs = seq(0, 1, length.out = K_eps + 1), 
-                  na.rm = TRUE)
+# 1. nest by unique epsilon_330
+rd_by_imprecision <- df_donut %>%
+  # only keep prior‐values with at least, say, 50 obs on each side of the 330 cutoff
+  group_by(epsilon_330) %>%
+  filter(
+    sum(ep_conso_5_usages_m2 <  330) >= 50,
+    sum(ep_conso_5_usages_m2 >= 330) >= 50
+  ) %>%
+  nest() %>%                     # one row per epsilon_330, with a data.frame in "data"
+  
+  # 2. run rdrobust on each
+  mutate(
+    fit = map(data,
+      ~ rdrobust(
+          y   = .x$pre_shopping,
+          x   = .x$ep_conso_5_usages_m2,
+          c   = 330,
+          p   = 1,
+          kernel = "triangular"
+        )
+    )
+  ) %>%
+  
+  # 3. extract the point‐estimate and se
+  mutate(
+    tau = map_dbl(fit, ~ .x$Estimate[1]),
+    se  = map_dbl(fit, ~ .x$se[1])
+  ) %>%
+  
+  # 4. drop the list‐columns and ungroup
+  select(epsilon_330, tau, se) %>%
+  ungroup()
 
-rd_bin_eps <- map_dfr(1:K_eps, function(k) {
-  # observations whose ε̂ falls into bin k
-  in_bin <- df$epsilon_330 >= q_eps[k] & df$epsilon_330 < q_eps[k + 1] & 
-            !is.na(df$epsilon_330)
-  if (sum(in_bin) < 200) return(NULL)  # skip bins that are too small
-  fit <- rdrobust(df$pre_shopping[in_bin],
-                  df$ep_conso_5_usages_m2[in_bin],
-                  c = 330.001, p = 1, kernel = "triangular")
-  tibble(bin          = k,
-         epsilon_mean = mean(df$epsilon_330[in_bin], na.rm = TRUE),
-         tau_hat      = fit$Estimate[1],
-         se_hat       = fit$se[1])
-})
-
-# visualise τ̂(ε̂)
-ggplot(rd_bin_eps,
-       aes(x = epsilon_mean, y = tau_hat)) +
-  geom_point(size = 2) +
-  geom_errorbar(aes(ymin = tau_hat - 1.96 * se_hat,
-                    ymax = tau_hat + 1.96 * se_hat),
-                width = 0) +
-  xlim(NaN, 0.4) +
-  ylim(0, NaN) +
-  geom_smooth(method = "lm", se = TRUE) +
-  labs(x = "Mean imprecision in bin (ε)",
-       y = "RD estimate of shopping jump (τ)",
-       title = "Heterogeneous RD effect across imprecision bins") +
+# 5. plot one point per epsilon_330
+ggplot(rd_by_imprecision, aes(x = epsilon_330, y = tau)) +
+  geom_point(size = 1.5) +
+  geom_errorbar(aes(
+    ymin = tau - 1.96 * se,
+    ymax = tau + 1.96 * se
+  ), width = 0) +
+  geom_smooth(method = "glm", se = TRUE) +
+  ylim(NaN, 1) +
+  labs(
+    x     = "Imprecision belief (ε)",
+    y     = "RD jump estimate τ(ε)",
+    title = "Heterogeneous RD effect at each distinct ε"
+  ) +
   theme_bw()
+
 ggsave("graphs/heterogeneous_RD_imprecision.png", width = 8, height = 6)
 
