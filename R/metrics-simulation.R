@@ -221,7 +221,7 @@ plot_prior_eps_box <- function(metrics_df, win_tag) {
          x = NULL, y = NULL) +
     theme_bw(base_size = 11)
 
-  ggsave(paste0("graphs/Boxplot_Prior_Epsilon_", win_tag, ".png"),
+  ggsave(paste0("graphs/Boxplot_Prior_Epsilon_", win_tag, "2.png"),
          width = 5.5, height = 4)
 }
 
