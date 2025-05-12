@@ -88,6 +88,54 @@ compute_epsilon <- function(real_data,
 
   # 3. “Excess” mass just *before* and *after* the boundary --------------
   excess_before <- sum(diff_pos[mids <  threshold]) * binwidth
+
+  # 4. Total observed mass in the class right *after* the boundary -------
+  total_after <- sum(dens_real[mids >= threshold]) * binwidth
+  
+  denom <- excess_before + total_after
+  if (denom == 0) return(NA_real_)
+
+  epsilon <- excess_before / denom        # 0–1; ×100 for %
+  return(epsilon)
+}
+
+compute_epsilon2 <- function(real_data,
+                            sim_data,
+                            lower      = 250,
+                            upper      = 420,
+                            threshold  = 330,
+                            binwidth   = 1) {
+
+  # 0. Keep only the window we’re analysing -------------------------------
+  sim_window  <- sim_data  %>% filter(total                 >= lower,
+                                      total                 <  upper)
+  real_window <- real_data %>% filter(ep_conso_5_usages_m2  >= lower,
+                                      ep_conso_5_usages_m2  <  upper)
+
+  if (nrow(sim_window) == 0 || nrow(real_window) == 0)
+    return(NA_real_)
+
+  # 1. Histograms on *identical* breaks ----------------------------------
+  breaks_seq <- seq(lower, upper, by = binwidth)
+
+  h_sim  <- hist(sim_window$total,
+                 breaks = breaks_seq,
+                 plot   = FALSE,
+                 prob   = TRUE)            # density integrates to 1
+  h_real <- hist(real_window$ep_conso_5_usages_m2,
+                 breaks = breaks_seq,
+                 plot   = FALSE,
+                 prob   = TRUE)
+
+  dens_sim   <- h_sim$density
+  dens_real  <- h_real$density
+  mids       <- h_real$mids              # common mid-points
+
+  # 2. Positive density gap (observed – baseline) ------------------------
+  diff_pos <- pmax(dens_real - dens_sim, 0)
+
+  # 3. “Excess” mass just *before* and *after* the boundary --------------
+  excess_before <- sum(diff_pos[mids <  threshold]) * binwidth
   excess_after <- sum(diff_pos[mids >=  threshold]) * binwidth
 
   # 4. Total observed mass in the class right *after* the boundary -------
@@ -185,7 +233,7 @@ df_metrics <- df
 # 2.a) Compute metrics on the threshold 330 kWh/m²
 subgroup_metrics330 <- get_subgroup_metrics(sim_df  = simulation_results_CSV,
                                          real_df = df_filtered,
-                                         lower = 250, upper = 420,
+                                         lower = 290, upper = 375,
                                          threshold = 330,
                                          binwidth = 1)
 
@@ -227,4 +275,4 @@ df_metrics <- df_metrics %>%
 
 # 3. Enregistrer le résultat ----
 
-write_csv(df_metrics, "alldpe_group_metrics_scott_new.csv")
+write_csv(df_metrics, "alldpe_group_metrics_scott_new_2.csv")
