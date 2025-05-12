@@ -190,15 +190,12 @@ ggsave("graphs/RD-shopping-estimate-cov-donut.png", width = 8, height = 6)
 
 # 1. nest by unique prior_330
 rd_by_prior <- df_donut %>%
-  # only keep prior‐values with at least, say, 50 obs on each side of the 330 cutoff
   group_by(prior_330) %>%
   filter(
     sum(ep_conso_5_usages_m2 <  330) >= 50,
     sum(ep_conso_5_usages_m2 >= 330) >= 50
   ) %>%
   nest() %>%                     # one row per prior_330, with a data.frame in "data"
-  
-  # 2. run rdrobust on each
   mutate(
     fit = map(data,
       ~ rdrobust(
@@ -210,14 +207,10 @@ rd_by_prior <- df_donut %>%
         )
     )
   ) %>%
-  
-  # 3. extract the point‐estimate and se
   mutate(
     tau = map_dbl(fit, ~ .x$Estimate[1]),
     se  = map_dbl(fit, ~ .x$se[1])
   ) %>%
-  
-  # 4. drop the list‐columns and ungroup
   select(prior_330, tau, se) %>%
   ungroup()
 
@@ -237,9 +230,17 @@ ggplot(rd_by_prior, aes(x = prior_330, y = tau)) +
   ) +
   theme_bw()
 
-
 ggsave("graphs/heterogeneous_RD_prior.png", width = 8, height = 6)
 
+ols_unw <- lm(tau ~ prior_330, data = rd_by_prior)
+summary(ols_unw)
+
+eps     <- 1e-10
+ols_w   <- lm(tau ~ prior_330,
+              data    = rd_by_prior,
+              weights = 1 / (se^2 + eps))
+
+summary(ols_w)
 
 # 8. RD estimation across imprecision (ε) heterogeneity ----
 
