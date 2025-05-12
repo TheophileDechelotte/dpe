@@ -8,7 +8,7 @@ library(scales)
 library(dplyr)
 library(splines)
 
-df2 <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-UniversitéParisSciencesetLettres/data-dpe/alldpe_metrics_scott_v3.csv")
+df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/alldpe_group_metrics_scott_new.csv")
 
 df2$type_logement <- factor(df2$type_logement)
 df2$periode_construction <- factor(df2$periode_construction)
