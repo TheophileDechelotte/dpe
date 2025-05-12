@@ -133,7 +133,7 @@ out_prior_plot <- rdplot(
   x.label = "Energy consumption (kWh/m²)",
   y.label = "Prior belief (330)"
 )
-ggsave("graphs/covariate-balance-prior-330-donut.png", width = 8, height = 6)
+ggsave("graphs/covariate-balance-prior-330.png", width = 8, height = 6)
 
 
 # 5. Covariate balance check ('epsilon_330') ----
