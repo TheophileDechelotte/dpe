@@ -8,7 +8,7 @@ library(scales)
 library(dplyr)
 library(splines)
 
-df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/alldpe_group_metrics_scott_new.csv")
+df2 <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_group_metrics_scott_new.csv")
 
 df2$type_logement <- factor(df2$type_logement)
 df2$periode_construction <- factor(df2$periode_construction)
@@ -20,15 +20,12 @@ df2 <- df2 %>% mutate(pre_shopping = if_else(interval_dpe_remplacant <= 90, 1, 0
                       diff_indicator = post_shopping - pre_shopping) %>%
              filter(prior_330 < 1,
                     epsilon_330 <= 1) %>%
-             select(id, ep_conso_5_usages_m2, desactive, pre_shopping, post_shopping, ancien_dpe_id, ancien_dpe_ep_conso_5_usages_m2, prior_330, epsilon_330)
+             select(id, ep_conso_5_usages_m2, desactive, pre_shopping, post_shopping, diff_indicator, prior_330, epsilon_330)
 
 delta <- 10 # width of the donut
 df2_donut <- df2 %>%
   filter(abs(ep_conso_5_usages_m2 - 330) > delta)
 
-df2_donut_filtered <- df2_donut %>%
-  filter(ep_conso_5_usages_m2 >= 250,
-         ep_conso_5_usages_m2 < 420)
 
 # 1. Primary RD estimation (local linear, triangular kernel) ----
 
@@ -103,7 +100,7 @@ ggsave("graphs/covariate-balance-epsilon-330-donut.png", width = 8, height = 6)
 out_diff <- rdrobust(
   y      = df2$diff_indicator,
   x      = df2$ep_conso_5_usages_m2,
-  c      = 330.001,
+  c      = 330,
   p      = 1,               # local linear
   kernel = "triangular"
 )
