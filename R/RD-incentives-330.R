@@ -5,7 +5,7 @@ library(tidyverse)
 library(ggplot2)
 library(dplyr)
 
-df <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_group_metrics_scott.csv")
+df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/alldpe_group_metrics_scott_new.csv")
 
 df$type_logement <- factor(df$type_logement)
 df$periode_construction <- factor(df$periode_construction)
@@ -28,7 +28,9 @@ summary(out_rd)  # Displays the RD estimate and robust confidence interval
 
 out_rd_plot <- rdplot(
   y = df$pre_shopping, 
-  x = round(df$ep_conso_5_usages_m2), 
+  x = df$ep_conso_5_usages_m2, 
+  binselect = "esmv", ci = 0.95,
+  scale = 0.01,
   c = 330, p = 1, kernel = "triangular", 
   h = 26.068,
   x.lim = c(300, 360),
