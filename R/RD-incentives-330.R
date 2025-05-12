@@ -5,7 +5,7 @@ library(tidyverse)
 library(ggplot2)
 library(dplyr)
 
-df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/alldpe_group_metrics_scott_new.csv")
+df <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_group_metrics_scott_new.csv")
 
 df$type_logement <- factor(df$type_logement)
 df$periode_construction <- factor(df$periode_construction)
@@ -84,9 +84,9 @@ summary(out_rd_donut)
 
 out_rd_donut_plot <- rdplot(
   y = df_donut$pre_shopping, 
-  x = round(df_donut$ep_conso_5_usages_m2), 
+  x = df_donut$ep_conso_5_usages_m2, 
   c = 330, p = 1, kernel = "triangular", 
-  nbins = 290, ci = 0.95,
+  nbins = 300, ci = 0.95,
   h = 62.263,
   x.lim = c(265, 395),
   y.lim = c(0.075, 0.125),
@@ -99,7 +99,7 @@ ggsave("graphs/RD-shopping-estimate-donut.png", width = 8, height = 6)
 
 
 # 3.c)  Sensitivity: repeat for multiple donut widths
-for (delta_alt in c(3, 5, 8, 10)) {
+for (delta_alt in c(5, 8, 10)) {
   df_tmp <- df %>%
     filter(abs(ep_conso_5_usages_m2 - 330) > delta_alt)
   out_tmp <- rdrobust(
