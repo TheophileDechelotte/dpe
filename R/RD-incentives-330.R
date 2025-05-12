@@ -123,11 +123,11 @@ summary(out_prior)
 
 out_prior_plot <- rdplot(
   y = df$prior_330, 
-  x = round(df$ep_conso_5_usages_m2), 
+  x = df$ep_conso_5_usages_m2, 
   c = 330, p = 1, kernel = "triangular", 
   h = 59.975,
   x.lim = c(250, 420),
-  y.lim = c(0.07, 0.13),
+  #y.lim = c(0.07, 0.13),
   title = "Covariate balance check (prior_330)",
   x.label = "Energy consumption (kWh/m²)",
   y.label = "Prior belief (330)"
