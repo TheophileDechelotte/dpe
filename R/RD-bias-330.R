@@ -132,6 +132,7 @@ out_diff_donut <- rdrobust(
   x      = df2_donut$ep_conso_5_usages_m2,
   c      = 330,
   p      = 1,               # local linear
+  h = c(46.537,46.537),
   kernel = "triangular"
 )
 summary(out_diff_donut)
@@ -139,12 +140,13 @@ summary(out_diff_donut)
 # Graph of the difference-in-discontinuities (post-shopping − pre-shopping)
 rdplot(
   y       = df2_donut$diff_indicator,
-  x       = round(df2_donut$ep_conso_5_usages_m2),
-  c       = 330.001,        # tiny offset avoids tying exactly at 330
+  x       = df2_donut$ep_conso_5_usages_m2,
+  c       = 330,        # tiny offset avoids tying exactly at 330
   p       = 1,
-  h =        ,
-  x.lim =    ,
-  y.lim =    ,
+  nbins   = 300, ci = 0.95,
+  h = 46.537,
+  x.lim = c(280, 380),
+  y.lim = c(-0.04, 0.04),
   kernel  = "triangular",
   title   = "Diff-in-discontinuities at 330 kWh/m²",
   x.label = "Energy consumption (kWh/m²)",
