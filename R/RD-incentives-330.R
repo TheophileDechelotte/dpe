@@ -12,7 +12,7 @@ df$periode_construction <- factor(df$periode_construction)
 df$type_energie_chauffage <- factor(df$type_energie_chauffage)
 
 # Create the energy_efficient variable (1 if ep_conso_5_usages_m2 <= 330, otherwise 0)
-df <- df %>% mutate(pre_shopping = if_else(interval_dpe_remplacant <= 90, 1, 0, missing = 0)) %>%
+df <- df %>% mutate(pre_shopping = if_else(interval_dpe_remplacant <= 30, 1, 0, missing = 0)) %>%
              filter(prior_330 < 1,
                     epsilon_330 <= 1,
                     ep_conso_5_usages_m2 <= 750) %>%
@@ -231,7 +231,7 @@ ggplot(rd_by_prior, aes(x = prior_330, y = tau)) +
   ) +
   theme_bw()
 
-ggsave("graphs/heterogeneous_RD_prior.png", width = 8, height = 6)
+ggsave("graphs/heterogeneous_RD_prior_30.png", width = 8, height = 6)
 
 ols_unw <- lm(tau ~ prior_330, data = rd_by_prior)
 summary(ols_unw)
