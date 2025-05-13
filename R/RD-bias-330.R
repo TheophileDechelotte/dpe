@@ -154,3 +154,15 @@ rdplot(
 )
 
 ggsave("graphs/RD-diff-shopping-estimate-donut.png", width = 8, height = 6)
+
+
+out_diff_donut_cov <- rdrobust(
+  y      = df2_donut$diff_indicator,
+  x      = df2_donut$ep_conso_5_usages_m2,
+  c      = 330,
+  p      = 1,
+  covs = cbind(df2_donut$prior_330, df2_donut$epsilon_330),
+  kernel = "triangular",
+  bwselect = 'msecomb1'
+)
+summary(out_diff_donut_cov)
