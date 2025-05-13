@@ -326,7 +326,7 @@ ggplot(rd_by_imprecision, aes(x = epsilon_330, y = tau)) +
   ) +
   theme_bw()
 
-ggsave("graphs/heterogeneous_RD_imprecision.png", width = 8, height = 6)
+ggsave("graphs/heterogeneous_RD_imprecision_30.png", width = 8, height = 6)
 
 # 1. Unweighted OLS
 ols_unw_eps <- lm(tau ~ epsilon_330, data = rd_by_imprecision)
