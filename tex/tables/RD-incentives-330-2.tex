@@ -1,0 +1,25 @@
+\resizebox{0.6\linewidth}{!}{
+\begin{threeparttable}
+    \begin{tabular}{lccc}
+      \toprule
+       & \multicolumn{3}{c}{Dependent variable: Retesting indicator} \\
+      \cmidrule(l){2-4}
+       & (1) & (2) & (3) \\
+      \midrule
+      RD jump, $\tau$ & $0.042^{***}$ & $0.034^{***}$ & $0.034^{***}$ \\
+      & (0.001) & (0.001) & (0.001) \\
+      \midrule
+      Bandwidth (h) & 26.07 & 62.26 & 59.98 \\
+      Kernel & Triangular & Triangular & Triangular     \\
+      Polynomial (p) & 1 & 1 & 1 \\
+      \midrule
+      Donut‐hole width & 0 & 10 & 10             \\
+      Covariates &  &  & $\pi$, $\epsilon$ \\
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}[flushleft]
+      \small
+      \item \textit{Notes:} Local‐linear regressions with triangular kernel.  Standard errors (in parentheses) are robust to heteroskedasticity.  Col. (3) includes the owner’s prior belief $\pi$ and imprecision $\epsilon$ as linear controls; col. (2) and (3) further exclude observations within $\pm10$\,kWh/m$^2$ of the cutoff.
+      \item $^{***}$ $p<0.01$; $^{**}$ $p<0.05$; $^{*}$ $p<0.10$.
+    \end{tablenotes}
+  \end{threeparttable}}

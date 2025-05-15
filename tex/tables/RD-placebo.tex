@@ -1,0 +1,25 @@
+\resizebox{0.7\linewidth}{!}{
+\begin{threeparttable}
+    \begin{tabular}{lcccc}
+      \toprule
+       & \multicolumn{2}{c}{Dependent variable:} & \multicolumn{2}{c}{Dependent variable:} \\
+       & \multicolumn{2}{c}{Retesting indicator} & \multicolumn{2}{c}{Post - pre-shopping indic.} \\
+      \cmidrule(lr){2-3} \cmidrule(lr){4-5}
+       & (1) & (2) & (3) & (4) \\
+      \midrule
+      RD jump, $\tau$ & $-0.002$ & $-0.002$ & $-0.003^*$ & $0.005^*$ \\
+      & (0.001) & (0.001) & (0.002) & (0.003) \\
+      \midrule
+      Bandwidth (h) & 13.819 & 44.473 & 59.975 & 67.636 \\
+      Kernel & Triangular & Triangular & Triangular & Triangular \\
+      Polynomial (p) & 1 & 1 & 1 & 1 \\
+      \midrule
+      Cutoff & 290 & 375 & 290 & 375 \\
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}[flushleft]
+      \small
+      \item \textit{Notes:} Local‐linear regressions with triangular kernel.  Standard errors (in parentheses) are robust to heteroskedasticity. 
+      \item $^{***}$ $p<0.01$; $^{**}$ $p<0.05$; $^{*}$ $p<0.10$.
+    \end{tablenotes}
+  \end{threeparttable}}

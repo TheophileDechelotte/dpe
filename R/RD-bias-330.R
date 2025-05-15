@@ -161,8 +161,26 @@ out_diff_donut_cov <- rdrobust(
   x      = df2_donut$ep_conso_5_usages_m2,
   c      = 330,
   p      = 1,
+  h = c(46.537,46.537),
   covs = cbind(df2_donut$prior_330, df2_donut$epsilon_330),
-  kernel = "triangular",
-  bwselect = 'msecomb1'
+  kernel = "triangular"
 )
 summary(out_diff_donut_cov)
+
+rdplot(
+  y       = df2_donut$diff_indicator,
+  x       = df2_donut$ep_conso_5_usages_m2,
+  c       = 330,        # tiny offset avoids tying exactly at 330
+  p       = 1,
+  nbins   = 300, ci = 0.95,
+  covs = cbind(df2_donut$prior_330, df2_donut$epsilon_330),
+  h = c(46.537,46.537),
+  x.lim = c(280, 380),
+  y.lim = c(-0.04, 0.04),
+  kernel  = "triangular",
+  title   = "Diff-in-discontinuities at 330 kWh/m²",
+  x.label = "Energy consumption (kWh/m²)",
+  y.label = "Post-shopping − Pre-shopping"
+)
+ggsave("graphs/RD-diff-shopping-estimate-donut-cov.png", width = 8, height = 6)
+

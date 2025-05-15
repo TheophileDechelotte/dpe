@@ -1,0 +1,25 @@
+\resizebox{0.7\linewidth}{!}{
+\begin{threeparttable}
+    \begin{tabular}{lcccc}
+      \toprule
+       & \multicolumn{2}{c}{Dependent variable:} & \multicolumn{2}{c}{Dependent variable:} \\
+       & \multicolumn{2}{c}{Prior $\pi$} & \multicolumn{2}{c}{Imprecision $\varepsilon$} \\
+      \cmidrule(lr){2-3} \cmidrule(lr){4-5}
+       & (1) & (2) & (3) & (4) \\
+      \midrule
+      RD jump, $\tau$ & $0.011^{***}$ & $-0.000^{***}$ & $-0.017^{***}$ & $-0.005^{***}$\\
+      & (0.001) & (0.000) & (0.001) & (0.001) \\
+      \midrule
+      Bandwidth (h) & 14.392 & 101.949 & 12.170 & 34.902 \\
+      Kernel & Triangular & Triangular & Triangular & Triangular \\
+      Polynomial (p) & 1 & 1 & 1 & 1 \\
+      \midrule
+      Donut‐hole width & 0 & 10 & 0 & 10 \\
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}[flushleft]
+      \small
+      \item \textit{Notes:} Local‐linear regressions with triangular kernel.  Standard errors (in parentheses) are robust to heteroskedasticity.  Col. (2) and (4) exclude observations within $\pm10$\,kWh/m$^2$ of the cutoff.
+      \item $^{***}$ $p<0.01$; $^{**}$ $p<0.05$; $^{*}$ $p<0.10$.
+    \end{tablenotes}
+  \end{threeparttable}}
