@@ -234,6 +234,9 @@ rd_bin <- map_dfr(1:K, function(k) {
          se_hat       = fit$se[1])
 })
 
+ # Display table of RD estimates by prior bins
+print(rd_bin)
+
 # visualise τ̂(π̂)
 ggplot(rd_bin,
        aes(x = prior_mean, y = tau_hat)) +
@@ -241,7 +244,6 @@ ggplot(rd_bin,
   geom_errorbar(aes(ymin = tau_hat - 1.96*se_hat,
                     ymax = tau_hat + 1.96*se_hat),
                 width = 0) +
-  geom_smooth(method = "glm", se = TRUE) +
   labs(x = "Mean prior in bin (π)",
        y = "RD estimate of shopping jump (τ)",
        title = "Heterogeneous RD effect across prior bins") +
@@ -250,7 +252,7 @@ ggplot(rd_bin,
 ggsave("graphs/heterogeneous_RD_prior.png", width = 8, height = 6)
 
 
-K_eps <- 20  # number of equal‑frequency bins; adjust as needed
+K_eps <- 2  # number of equal‑frequency bins; adjust as needed
 q_eps <- quantile(df$epsilon_330, probs = seq(0, 1, length.out = K_eps + 1), 
                   na.rm = TRUE)
 
@@ -267,6 +269,8 @@ rd_bin_eps <- map_dfr(1:K_eps, function(k) {
          tau_hat      = fit$Estimate[1],
          se_hat       = fit$se[1])
 })
+
+print(rd_bin_eps)
 
 # visualise τ̂(ε̂)
 ggplot(rd_bin_eps,
@@ -327,13 +331,11 @@ ggplot(rd_by_prior, aes(x = prior_330, y = tau)) +
     ymin = tau - 1.96 * se,
     ymax = tau + 1.96 * se
   ), width = 0) +
-  geom_smooth(method = "glm", se = TRUE) +
   ylim(NaN, 1) +
   labs(
     x     = "Prior belief (π)",
     y     = "RD jump estimate τ(π)",
-    title = "Heterogeneous RD effect at each distinct π"
-  ) +
+    title = "Heterogeneous RD effect at each distinct π") +
   theme_bw()
 
 ggsave("graphs/heterogeneous_RD_prior_30.png", width = 8, height = 6)

@@ -233,7 +233,7 @@ df_metrics <- df
 # 2.a) Compute metrics on the threshold 330 kWh/m²
 subgroup_metrics330 <- get_subgroup_metrics(sim_df  = simulation_results_CSV,
                                          real_df = df_filtered,
-                                         lower = 290, upper = 375,
+                                         lower = 250, upper = 420,
                                          threshold = 330,
                                          binwidth = 1)
 

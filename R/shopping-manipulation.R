@@ -240,7 +240,7 @@ shopping_certif_diff <- full_join(certif_diff, shopping_diff, by = "x") %>%
   transmute(
     x,
     density_diff = diff_post - diff_first
-  )
+  )  
 
 # 3. Plot
 ggplot(
@@ -248,17 +248,48 @@ ggplot(
   aes(x = x, y = density_diff)
 ) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-  geom_col(width = 4, fill = 'blue', alpha = 0.8) +
+  geom_col(width = 4, fill = 'blue', alpha = 0.7) +
   scale_x_cut(breaks = dpe_thresholds, space = 0.2) +
   labs(
     x     = "Energy consumption (kWh/m²)",
     y     = "Density difference (Post shopping – 1st certification)",
     title = "Post-shopping vs 1st-certification manipulation shift"
   ) +
-  theme_bw() + 
   theme(panel.grid.major = element_blank(),  # supprime les grilles majeures
     panel.grid.minor = element_blank()   # supprime les grilles mineures
   )
 
 ggsave("graphs/deformation_post_vs_first.png", width = 8, height = 6)
 
+
+# 2. Join on x only, then compute final difference
+shopping_certif <- full_join(certif_diff, shopping_diff, by = "x") %>%
+  replace_na(list(diff_first = 0, diff_post = 0)) %>%
+  transmute(
+    x,
+    `Post shopping – Baseline`    = diff_post,
+    `1st certification – Baseline` = diff_first
+  ) %>%
+  pivot_longer(-x, names_to = "comparison", values_to = "density_diff") 
+
+# now plot
+ggplot(shopping_certif %>% filter(x >= 0 & x <= 500), 
+  aes(x = x, y = density_diff, fill = comparison)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  geom_col(width = 4, alpha = 0.7, position = "identity") +
+  scale_x_cut(breaks = dpe_thresholds, space = 0.2) +
+  scale_fill_manual(values = c(
+    "1st certification – Baseline" = "yellow",
+    "Post shopping – Baseline"     = "red"
+  )) +
+  labs(
+    x     = "Energy consumption (kWh/m²)",
+    y     = "Density difference",
+    fill = NULL
+  ) +
+  theme(legend.position = "bottom")  + 
+  theme(panel.grid.major = element_blank(),  # supprime les grilles majeures
+    panel.grid.minor = element_blank()   # supprime les grilles mineures
+  )
+
+ggsave("graphs/deformation_hist.png", width = 8, height = 6)
