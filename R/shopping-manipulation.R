@@ -1,6 +1,8 @@
 # Charger les bibliothèques nécessaires
 library(tidyverse)
 library(scales)
+library(ggbreak)
+
 
 
 # Lire les données
@@ -16,7 +18,7 @@ df_shopping <- df %>%
          !is_ancien_dpe,
          interval_ancien_dpe <= 90)
 
-df_shopping30 <- df %>%
+#df_shopping30 <- df %>%
   filter(is_dpe_remplacant,
          !is_ancien_dpe,
          interval_ancien_dpe <= 30)
@@ -24,7 +26,7 @@ df_shopping30 <- df %>%
 df_certif <- df %>%
   filter(!is_dpe_remplacant)
 
-df_last_certif <- df %>%
+#df_last_certif <- df %>%
   filter(!desactive)
 
 certif_simulation <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott.csv")
@@ -33,13 +35,13 @@ certif_simulation <- certif_simulation %>% filter(total <= 800)
 post_shopping_simulation <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_post_shopping.csv")
 post_shopping_simulation <- post_shopping_simulation %>% filter(total <= 800)
 
-post_shopping_simulation30 <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_post_shopping30.csv")
-post_shopping_simulation30 <- post_shopping_simulation30 %>% filter(total <= 800)
+#post_shopping_simulation30 <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_post_shopping30.csv")
+#post_shopping_simulation30 <- post_shopping_simulation30 %>% filter(total <= 800)
 
-last_certif_simulation <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_last_certif.csv")
-last_certif_simulation <- last_certif_simulation %>% filter(total <= 800)
+#last_certif_simulation <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/simulation_scott_last_certif.csv")
+#last_certif_simulation <- last_certif_simulation %>% filter(total <= 800)
 
-breaks <- seq(0, 800, by = 1)
+breaks <- seq(0, 800, by = 4)
 dpe_thresholds <- c(70, 110, 180, 250, 330, 420)
 
 # helper to compute mids and densities
@@ -56,13 +58,13 @@ bin_width <- diff(breaks)[1]
 # 1. Build histograms on the same breaks
 h_first_certif   <- get_hist(df_certif$ep_conso_5_usages_m2)
 h_post_shopping  <- get_hist(df_shopping$ep_conso_5_usages_m2)
-h_last_certif    <- get_hist(df_last_certif$ep_conso_5_usages_m2)
-h_post_shopping30 <- get_hist(df_shopping30$ep_conso_5_usages_m2)
+#h_last_certif    <- get_hist(df_last_certif$ep_conso_5_usages_m2)
+#h_post_shopping30 <- get_hist(df_shopping30$ep_conso_5_usages_m2)
 
 h_first_certif_baseline   <- get_hist(certif_simulation$total)
 h_post_shopping_baseline  <- get_hist(post_shopping_simulation$total)
-h_last_certif_baseline    <- get_hist(last_certif_simulation$total)
-h_post_shopping30_baseline <- get_hist(post_shopping_simulation30$total)
+#h_last_certif_baseline    <- get_hist(last_certif_simulation$total)
+#h_post_shopping30_baseline <- get_hist(post_shopping_simulation30$total)
 
 df_obs <- df_last_certif
 h_obs <- h_last_certif
@@ -241,17 +243,22 @@ shopping_certif_diff <- full_join(certif_diff, shopping_diff, by = "x") %>%
   )
 
 # 3. Plot
-ggplot(shopping_certif_diff, aes(x = x, y = density_diff)) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
-  geom_col(width = 4, fill = "blue", alpha = 0.7) +
-  geom_vline(xintercept = dpe_thresholds, linetype = "dotted", color = "black", linewidth = 0.2) +
-  coord_cartesian(xlim = c(0, 600)) +
+ggplot(
+  shopping_certif_diff %>% filter(x >= 0 & x <= 500),
+  aes(x = x, y = density_diff)
+) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  geom_col(width = 4, fill = 'blue', alpha = 0.8) +
+  scale_x_cut(breaks = dpe_thresholds, space = 0.2) +
   labs(
     x     = "Energy consumption (kWh/m²)",
     y     = "Density difference (Post shopping – 1st certification)",
     title = "Post-shopping vs 1st-certification manipulation shift"
   ) +
-  theme_bw()
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(),  # supprime les grilles majeures
+    panel.grid.minor = element_blank()   # supprime les grilles mineures
+  )
 
 ggsave("graphs/deformation_post_vs_first.png", width = 8, height = 6)
 
