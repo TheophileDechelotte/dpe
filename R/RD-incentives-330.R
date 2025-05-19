@@ -4,15 +4,16 @@ library(rddensity)
 library(tidyverse)
 library(ggplot2)
 library(dplyr)
+library(QTE.RD)
 
-df <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_group_metrics_scott_new.csv")
+df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/alldpe_group_metrics_scott_new.csv")
 
 df$type_logement <- factor(df$type_logement)
 df$periode_construction <- factor(df$periode_construction)
 df$type_energie_chauffage <- factor(df$type_energie_chauffage)
 
 # Create the energy_efficient variable (1 if ep_conso_5_usages_m2 <= 330, otherwise 0)
-df <- df %>% mutate(pre_shopping = if_else(interval_dpe_remplacant <= 30, 1, 0, missing = 0)) %>%
+df <- df %>% mutate(pre_shopping = if_else(interval_dpe_remplacant <= 90, 1, 0, missing = 0)) %>%
              filter(prior_330 < 1,
                     epsilon_330 <= 1,
                     ep_conso_5_usages_m2 <= 750) %>%
@@ -187,7 +188,111 @@ out_rd_cov_plot <- rdplot(
 
 ggsave("graphs/RD-shopping-estimate-cov-donut.png", width = 8, height = 6)
 
+
+
+
+
+
 # 7. RD estimation across prior (π) heterogeneity ----
+
+# run quantile‐RD for prior_330 as the outcome
+qte_prior <- rd.qte(
+  y   = df_donut$pre_shopping, 
+  x = cbind(df_donut$ep_conso_5_usages_m2, df_donut$prior_330),
+  d = (df_donut$ep_conso_5_usages_m2 >= 330),
+  bdw = 60,
+  x0   = 330,
+  z0 = median(df_donut$prior_330, na.rm = TRUE),
+  tau = 0.5,
+  cov = 1,
+  bias = 1
+)
+
+# glance at the point‐estimates and CIs for each tau
+summary(qte_prior)
+
+# plot the quantile‐treatment effects
+plot(qte_prior,
+     main = "RD Quantile Effects on prior_330",
+     xlab = "Quantile τ",
+     ylab = "Estimated Jump in prior_330")
+
+
+
+
+K <- 2  # number of equal‑frequency bins; adjust as needed
+q <- quantile(df_donut$prior_330, probs = seq(0, 1, length.out = K + 1), na.rm = TRUE)
+
+rd_bin <- map_dfr(1:K, function(k) {
+  # rows whose π̂ falls into bin k
+  in_bin <- df_donut$prior_330 >= q[k] & df_donut$prior_330 < q[k + 1] & !is.na(df_donut$prior_330)
+  if (sum(in_bin) < 200) return(NULL)  # skip tiny bins
+  fit <- rdrobust(df_donut$pre_shopping[in_bin], df_donut$ep_conso_5_usages_m2[in_bin], c = 330, p = 1, kernel = "triangular")
+  tibble(bin          = k,
+         prior_mean   = mean(df$prior_330[in_bin], na.rm = TRUE),
+         tau_hat      = fit$Estimate[1],
+         se_hat       = fit$se[1])
+})
+
+# visualise τ̂(π̂)
+ggplot(rd_bin,
+       aes(x = prior_mean, y = tau_hat)) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(ymin = tau_hat - 1.96*se_hat,
+                    ymax = tau_hat + 1.96*se_hat),
+                width = 0) +
+  geom_smooth(method = "glm", se = TRUE) +
+  labs(x = "Mean prior in bin (π)",
+       y = "RD estimate of shopping jump (τ)",
+       title = "Heterogeneous RD effect across prior bins") +
+  theme_bw()
+
+ggsave("graphs/heterogeneous_RD_prior.png", width = 8, height = 6)
+
+
+K_eps <- 20  # number of equal‑frequency bins; adjust as needed
+q_eps <- quantile(df$epsilon_330, probs = seq(0, 1, length.out = K_eps + 1), 
+                  na.rm = TRUE)
+
+rd_bin_eps <- map_dfr(1:K_eps, function(k) {
+  # observations whose ε̂ falls into bin k
+  in_bin <- df$epsilon_330 >= q_eps[k] & df$epsilon_330 < q_eps[k + 1] & 
+            !is.na(df$epsilon_330)
+  if (sum(in_bin) < 200) return(NULL)  # skip bins that are too small
+  fit <- rdrobust(df$pre_shopping[in_bin],
+                  df$ep_conso_5_usages_m2[in_bin],
+                  c = 330, p = 1, kernel = "triangular")
+  tibble(bin          = k,
+         epsilon_mean = mean(df$epsilon_330[in_bin], na.rm = TRUE),
+         tau_hat      = fit$Estimate[1],
+         se_hat       = fit$se[1])
+})
+
+# visualise τ̂(ε̂)
+ggplot(rd_bin_eps,
+       aes(x = epsilon_mean, y = tau_hat)) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(ymin = tau_hat - 1.96 * se_hat,
+                    ymax = tau_hat + 1.96 * se_hat),
+                width = 0) +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(x = "Mean imprecision in bin (ε)",
+       y = "RD estimate of shopping jump (τ)",
+       title = "Heterogeneous RD effect across imprecision bins") +
+  theme_bw()
+
+ggsave("graphs/heterogeneous_RD_imprecision.png", width = 8, height = 6)
+
+
+
+
+
+
+
+
+
+
+
 
 # 1. nest by unique prior_330
 rd_by_prior <- df_donut %>%
@@ -233,7 +338,7 @@ ggplot(rd_by_prior, aes(x = prior_330, y = tau)) +
 
 ggsave("graphs/heterogeneous_RD_prior_30.png", width = 8, height = 6)
 
-ols_unw <- lm(tau ~ prior_330, data = rd_by_prior)
+ols_unw <- lm(tau_hat ~ prior_mean, data = rd_bin)
 summary(ols_unw)
 
 rd_by_prior_clean <- rd_by_prior %>%
@@ -329,7 +434,7 @@ ggplot(rd_by_imprecision, aes(x = epsilon_330, y = tau)) +
 ggsave("graphs/heterogeneous_RD_imprecision_30.png", width = 8, height = 6)
 
 # 1. Unweighted OLS
-ols_unw_eps <- lm(tau ~ epsilon_330, data = rd_by_imprecision)
+ols_unw_eps <- lm(tau_hat ~ epsilon_mean, data = rd_bin_eps)
 summary(ols_unw_eps)
 
 # 2. Precision‐weighted OLS (add small eps to avoid Inf)
