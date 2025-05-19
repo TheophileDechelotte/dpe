@@ -6,7 +6,7 @@ library(ggplot2)
 library(dplyr)
 library(QTE.RD)
 
-df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/alldpe_group_metrics_scott_new.csv")
+df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/alldpe_group_metrics_scott_new_2.csv")
 
 df$type_logement <- factor(df$type_logement)
 df$periode_construction <- factor(df$periode_construction)
@@ -127,14 +127,14 @@ out_prior_plot <- rdplot(
   x = df_donut$ep_conso_5_usages_m2, 
   c = 330, p = 1, kernel = "triangular", 
   nbins = 150, ci = 0.95,
-  h = 101.949,
-  x.lim = c(230, 430),
-  y.lim = c(0.6, 0.8),
+  h = 110.154,
+  x.lim = c(220, 440),
+  y.lim = c(0.54, 0.66),
   title = "Covariate balance check (prior_330)",
   x.label = "Energy consumption (kWh/m²)",
   y.label = "Prior belief (330)"
 )
-ggsave("graphs/covariate-balance-prior-330-donut.png", width = 8, height = 6)
+ggsave("graphs/covariate-balance-prior-330-donut-robustness.png", width = 8, height = 6)
 
 
 # 5. Covariate balance check ('epsilon_330') ----
@@ -152,14 +152,14 @@ out_imprecision_plot <- rdplot(
   x = df_donut$ep_conso_5_usages_m2, 
   c = 330, p = 1, kernel = "triangular", 
   nbins = 150, ci = 0.95,
-  h = 34.902,
+  h = 39.599,
   x.lim = c(290, 370),
-  y.lim = c(0.15, 0.25),
+  y.lim = c(0.225, 0.275),
   title = "Covariate balance check (epsilon_330)",
   x.label = "Energy consumption (kWh/m²)",
   y.label = "Imprecision (ε) (330)"
 )
-ggsave("graphs/covariate-balance-epsilon-330-donut.png", width = 8, height = 6)
+ggsave("graphs/covariate-balance-epsilon-330-donut-robustness.png", width = 8, height = 6)
 
 
 # 6. Primary RD estimation with covariates (local linear, triangular kernel) ----
