@@ -6,14 +6,14 @@ library(ggplot2)
 library(dplyr)
 library(QTE.RD)
 
-df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/alldpe_group_metrics_scott_new_2.csv")
+df <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/alldpe_group_metrics_scott_new.csv")
 
 df$type_logement <- factor(df$type_logement)
 df$periode_construction <- factor(df$periode_construction)
 df$type_energie_chauffage <- factor(df$type_energie_chauffage)
 
 # Create the energy_efficient variable (1 if ep_conso_5_usages_m2 <= 330, otherwise 0)
-df <- df %>% mutate(pre_shopping = if_else(interval_dpe_remplacant <= 90, 1, 0, missing = 0)) %>%
+df <- df %>% mutate(pre_shopping = if_else(interval_dpe_remplacant <= 30, 1, 0, missing = 0)) %>%
              filter(prior_330 < 1,
                     epsilon_330 <= 1,
                     ep_conso_5_usages_m2 <= 750) %>%
@@ -79,7 +79,8 @@ rdplotdensity(dens_trim,
 out_rd_donut <- rdrobust(
   y = df_donut$pre_shopping,
   x = df_donut$ep_conso_5_usages_m2,
-  c = 330, p = 1, kernel = "triangular"
+  c = 330, p = 1, kernel = "triangular", 
+  h = 60
 )
 summary(out_rd_donut)
 
@@ -88,15 +89,15 @@ out_rd_donut_plot <- rdplot(
   x = df_donut$ep_conso_5_usages_m2, 
   c = 330, p = 1, kernel = "triangular", 
   nbins = 300, ci = 0.95,
-  h = 62.263,
+  h = 60,
   x.lim = c(265, 395),
-  y.lim = c(0.075, 0.125),
+  y.lim = c(0.06, 0.11),
   title = "Shopping RD estimate (330)",
   x.label = "Energy consumption (kWh/m²)",
   y.label = "Shopping"
 )
 
-ggsave("graphs/RD-shopping-estimate-donut.png", width = 8, height = 6)
+ggsave("graphs/RD-shopping-estimate-donut-30days.png", width = 8, height = 6)
 
 
 # 3.c)  Sensitivity: repeat for multiple donut widths
@@ -168,7 +169,8 @@ out_rd_cov <- rdrobust(
   y = df_donut$pre_shopping,
   x = df_donut$ep_conso_5_usages_m2,
   covs = cbind(df_donut$prior_330, df_donut$epsilon_330),
-  c = 330, p = 1, kernel = "triangular"
+  c = 330, p = 1, kernel = "triangular", 
+  h = 60
 )
 summary(out_rd_cov)  # Displays the RD estimate and robust confidence interval
 
@@ -178,8 +180,8 @@ out_rd_cov_plot <- rdplot(
   c = 330, p = 1, kernel = "triangular", 
   covs = cbind(df_donut$prior_330, df_donut$epsilon_330),
   nbins   = 300, ci = 0.95,
-  h = 66.421,
-  x.lim = c(260, 400),
+  h = 60,
+  x.lim = c(270, 390),
   y.lim = c(0.07, 0.13),
   title = "Shopping RD estimate with covariates (330)",
   x.label = "Energy consumption (kWh/m²)",
@@ -227,11 +229,13 @@ rd_bin <- map_dfr(1:K, function(k) {
   # rows whose π̂ falls into bin k
   in_bin <- df_donut$prior_330 >= q[k] & df_donut$prior_330 < q[k + 1] & !is.na(df_donut$prior_330)
   if (sum(in_bin) < 200) return(NULL)  # skip tiny bins
-  fit <- rdrobust(df_donut$pre_shopping[in_bin], df_donut$ep_conso_5_usages_m2[in_bin], c = 330, p = 1, kernel = "triangular")
+  fit <- rdrobust(df_donut$pre_shopping[in_bin], df_donut$ep_conso_5_usages_m2[in_bin], c = 330, p = 1, kernel = "triangular", h = 60)
+  print(summary(fit))
   tibble(bin          = k,
-         prior_mean   = mean(df$prior_330[in_bin], na.rm = TRUE),
+         prior_mean   = mean(df_donut$prior_330[in_bin], na.rm = TRUE),
          tau_hat      = fit$Estimate[1],
-         se_hat       = fit$se[1])
+         se_hat       = fit$se[1],
+         p_value      = fit$pv[1])
 })
 
  # Display table of RD estimates by prior bins
@@ -253,21 +257,23 @@ ggsave("graphs/heterogeneous_RD_prior.png", width = 8, height = 6)
 
 
 K_eps <- 2  # number of equal‑frequency bins; adjust as needed
-q_eps <- quantile(df$epsilon_330, probs = seq(0, 1, length.out = K_eps + 1), 
+q_eps <- quantile(df_donut$epsilon_330, probs = seq(0, 1, length.out = K_eps + 1), 
                   na.rm = TRUE)
 
 rd_bin_eps <- map_dfr(1:K_eps, function(k) {
   # observations whose ε̂ falls into bin k
-  in_bin <- df$epsilon_330 >= q_eps[k] & df$epsilon_330 < q_eps[k + 1] & 
-            !is.na(df$epsilon_330)
+  in_bin <- df_donut$epsilon_330 >= q_eps[k] & df_donut$epsilon_330 < q_eps[k + 1] & 
+            !is.na(df_donut$epsilon_330)
   if (sum(in_bin) < 200) return(NULL)  # skip bins that are too small
-  fit <- rdrobust(df$pre_shopping[in_bin],
-                  df$ep_conso_5_usages_m2[in_bin],
-                  c = 330, p = 1, kernel = "triangular")
+  fit <- rdrobust(df_donut$pre_shopping[in_bin],
+                  df_donut$ep_conso_5_usages_m2[in_bin],
+                  c = 330, p = 1, kernel = "triangular", h = 60)
+  print(summary(fit))
   tibble(bin          = k,
-         epsilon_mean = mean(df$epsilon_330[in_bin], na.rm = TRUE),
+         epsilon_mean = mean(df_donut$epsilon_330[in_bin], na.rm = TRUE),
          tau_hat      = fit$Estimate[1],
-         se_hat       = fit$se[1])
+         se_hat       = fit$se[1],
+         p_value      = fit$pv[1])
 })
 
 print(rd_bin_eps)
@@ -313,6 +319,7 @@ rd_by_prior <- df_donut %>%
           x   = .x$ep_conso_5_usages_m2,
           c   = 330,
           p   = 1,
+          h = 59.98,
           kernel = "triangular"
         )
     )
@@ -331,7 +338,6 @@ ggplot(rd_by_prior, aes(x = prior_330, y = tau)) +
     ymin = tau - 1.96 * se,
     ymax = tau + 1.96 * se
   ), width = 0) +
-  ylim(NaN, 1) +
   labs(
     x     = "Prior belief (π)",
     y     = "RD jump estimate τ(π)",
@@ -402,6 +408,7 @@ rd_by_imprecision <- df_donut %>%
           x   = .x$ep_conso_5_usages_m2,
           c   = 330,
           p   = 1,
+          h = 59.98,
           kernel = "triangular"
         )
     )
@@ -424,8 +431,6 @@ ggplot(rd_by_imprecision, aes(x = epsilon_330, y = tau)) +
     ymin = tau - 1.96 * se,
     ymax = tau + 1.96 * se
   ), width = 0) +
-  geom_smooth(method = "glm", se = TRUE) +
-  ylim(NaN, 1) +
   labs(
     x     = "Imprecision belief (ε)",
     y     = "RD jump estimate τ(ε)",
