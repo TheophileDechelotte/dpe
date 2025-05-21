@@ -8,15 +8,15 @@ library(scales)
 library(dplyr)
 library(splines)
 
-df2 <- read_csv("C:\\Users\\tdechelotte\\Desktop\\alldpe_group_metrics_scott_new.csv")
+df2 <- read_csv("/Users/theophiledechelotte/Library/CloudStorage/OneDrive-Personnel/dpe-data/alldpe_group_metrics_scott_new.csv")
 
 df2$type_logement <- factor(df2$type_logement)
 df2$periode_construction <- factor(df2$periode_construction)
 df2$type_energie_chauffage <- factor(df2$type_energie_chauffage)
 
 # Create the energy_efficient variable (1 if ep_conso_5_usages_m2 <= 330, otherwise 0)
-df2 <- df2 %>% mutate(pre_shopping = if_else(interval_dpe_remplacant <= 90, 1, 0, missing = 0),
-                      post_shopping = if_else(interval_ancien_dpe <= 90, 1, 0, missing = 0),
+df2 <- df2 %>% mutate(pre_shopping = if_else(interval_dpe_remplacant <= 30, 1, 0, missing = 0),
+                      post_shopping = if_else(interval_ancien_dpe <= 30, 1, 0, missing = 0),
                       diff_indicator = post_shopping - pre_shopping) %>%
              filter(prior_330 < 1,
                     epsilon_330 <= 1) %>%
@@ -132,7 +132,7 @@ out_diff_donut <- rdrobust(
   x      = df2_donut$ep_conso_5_usages_m2,
   c      = 330,
   p      = 1,               # local linear
-  h = c(46.537,46.537),
+  h = c(42.053,42.053),
   kernel = "triangular"
 )
 summary(out_diff_donut)
@@ -144,7 +144,7 @@ rdplot(
   c       = 330,        # tiny offset avoids tying exactly at 330
   p       = 1,
   nbins   = 300, ci = 0.95,
-  h = 46.537,
+  h = 42.053,
   x.lim = c(280, 380),
   y.lim = c(-0.04, 0.04),
   kernel  = "triangular",
@@ -153,7 +153,7 @@ rdplot(
   y.label = "Post-shopping − Pre-shopping"
 )
 
-ggsave("graphs/RD-diff-shopping-estimate-donut.png", width = 8, height = 6)
+ggsave("graphs/RD-diff-shopping-estimate-donut-30days.png", width = 8, height = 6)
 
 
 out_diff_donut_cov <- rdrobust(
@@ -161,7 +161,7 @@ out_diff_donut_cov <- rdrobust(
   x      = df2_donut$ep_conso_5_usages_m2,
   c      = 330,
   p      = 1,
-  h = c(46.537,46.537),
+  h = c(42.053,42.053),
   covs = cbind(df2_donut$prior_330, df2_donut$epsilon_330),
   kernel = "triangular"
 )
@@ -174,7 +174,7 @@ rdplot(
   p       = 1,
   nbins   = 300, ci = 0.95,
   covs = cbind(df2_donut$prior_330, df2_donut$epsilon_330),
-  h = c(46.537,46.537),
+  h = c(42.053,42.053),
   x.lim = c(280, 380),
   y.lim = c(-0.04, 0.04),
   kernel  = "triangular",

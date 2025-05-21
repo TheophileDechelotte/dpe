@@ -188,7 +188,7 @@ get_subgroup_metrics <- function(sim_df,
                                     upper     = upper,
                                     threshold = threshold)
  
-            eps_val <- compute_epsilon(real_sub, sim_sub,
+            eps_val <- compute_epsilon2(real_sub, sim_sub,
                                        lower     = lower,
                                        upper     = upper,
                                        threshold = threshold,
@@ -233,7 +233,7 @@ df_metrics <- df
 # 2.a) Compute metrics on the threshold 330 kWh/m²
 subgroup_metrics330 <- get_subgroup_metrics(sim_df  = simulation_results_CSV,
                                          real_df = df_filtered,
-                                         lower = 250, upper = 420,
+                                         lower = 290, upper = 375,
                                          threshold = 330,
                                          binwidth = 1)
 
